@@ -1,15 +1,12 @@
----@alias Entity {isPlayer: boolean, uuid: string, name: string}
-
 local focal_port = peripheral.find("focal_port") or error("No focal port connected")
-local impetus = peripheral.find("cleric_impetus") or error("No spell circle found")
+local impetus = peripheral.find("cleric_impetus") or error("No spell circle connected")
 
 ---The function that does the teleporting
----@param entities Entity[]
 ---@param destination ccTweaked.Vector
 ---@return boolean
 ---@return string
-local function teleport(entities, destination)
-    focal_port.writeIota(entities)
+local function teleport(destination)
+    focal_port.writeIota(destination)
     impetus.activateCircle()
 
     while impetus.isCasting() do
@@ -21,4 +18,4 @@ local function teleport(entities, destination)
 end
 
 print(focal_port.hasFocus())
-teleport(nil, nil)
+teleport({x = -200, y = 120, z = 120})

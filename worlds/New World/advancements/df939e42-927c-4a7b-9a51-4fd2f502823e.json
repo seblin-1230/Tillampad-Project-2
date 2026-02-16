@@ -430,6 +430,12 @@
     },
     "done": true
   },
+  "hexcasting:recipes/building_blocks/slate_block": {
+    "criteria": {
+      "has_item": "2026-02-16 09:56:24 +0100"
+    },
+    "done": true
+  },
   "hexcasting:recipes/misc/decompose_quenched_shard/shard": {
     "criteria": {
       "has_item": "2026-02-16 10:12:31 +0100"
@@ -448,9 +454,231 @@
     },
     "done": true
   },
-  "hexcasting:recipes/building_blocks/slate_block": {
+  "hexcasting:recipes/misc/dye_colorizer_cyan": {
     "criteria": {
-      "has_item": "2026-02-16 09:56:24 +0100"
+      "has_item": "2026-02-16 14:37:49 +0100"
+    },
+    "done": true
+  },
+  "hexcasting:recipes/misc/dye_colorizer_magenta": {
+    "criteria": {
+      "has_item": "2026-02-16 14:37:49 +0100"
+    },
+    "done": true
+  },
+  "hexcasting:recipes/building_blocks/amethyst_dust_packing": {
+    "criteria": {
+      "has_item": "2026-02-16 14:37:49 +0100"
+    },
+    "done": true
+  },
+  "hexcasting:recipes/misc/pride_colorizer_intersex": {
+    "criteria": {
+      "has_item": "2026-02-16 14:37:49 +0100"
+    },
+    "done": true
+  },
+  "hexcasting:recipes/misc/default_colorizer": {
+    "criteria": {
+      "has_item": "2026-02-16 14:37:49 +0100"
+    },
+    "done": true
+  },
+  "hexcasting:recipes/building_blocks/amethyst_dust_unpacking": {
+    "criteria": {
+      "has_item": "2026-02-16 14:37:49 +0100"
+    },
+    "done": true
+  },
+  "hexcasting:recipes/misc/uuid_colorizer": {
+    "criteria": {
+      "has_item": "2026-02-16 14:37:49 +0100"
+    },
+    "done": true
+  },
+  "hexcasting:recipes/misc/dye_colorizer_yellow": {
+    "criteria": {
+      "has_item": "2026-02-16 14:37:49 +0100"
+    },
+    "done": true
+  },
+  "hexcasting:recipes/misc/pride_colorizer_aroace": {
+    "criteria": {
+      "has_item": "2026-02-16 14:37:49 +0100"
+    },
+    "done": true
+  },
+  "hexcasting:recipes/misc/pride_colorizer_nonbinary": {
+    "criteria": {
+      "has_item": "2026-02-16 14:37:49 +0100"
+    },
+    "done": true
+  },
+  "hexcasting:recipes/misc/pride_colorizer_aromantic": {
+    "criteria": {
+      "has_item": "2026-02-16 14:37:49 +0100"
+    },
+    "done": true
+  },
+  "hexcasting:recipes/misc/pride_colorizer_bisexual": {
+    "criteria": {
+      "has_item": "2026-02-16 14:37:49 +0100"
+    },
+    "done": true
+  },
+  "hexcasting:recipes/misc/dye_colorizer_pink": {
+    "criteria": {
+      "has_item": "2026-02-16 14:37:49 +0100"
+    },
+    "done": true
+  },
+  "hexcasting:recipes/misc/dye_colorizer_lime": {
+    "criteria": {
+      "has_item": "2026-02-16 14:37:49 +0100"
+    },
+    "done": true
+  },
+  "hexcasting:recipes/misc/dye_colorizer_blue": {
+    "criteria": {
+      "has_item": "2026-02-16 14:37:49 +0100"
+    },
+    "done": true
+  },
+  "hexcasting:recipes/misc/dye_colorizer_orange": {
+    "criteria": {
+      "has_item": "2026-02-16 14:37:49 +0100"
+    },
+    "done": true
+  },
+  "hexcasting:recipes/misc/dye_colorizer_white": {
+    "criteria": {
+      "has_item": "2026-02-16 14:37:49 +0100"
+    },
+    "done": true
+  },
+  "hexcasting:recipes/misc/pride_colorizer_gay": {
+    "criteria": {
+      "has_item": "2026-02-16 14:37:49 +0100"
+    },
+    "done": true
+  },
+  "hexcasting:recipes/misc/dye_colorizer_light_gray": {
+    "criteria": {
+      "has_item": "2026-02-16 14:37:49 +0100"
+    },
+    "done": true
+  },
+  "hexcasting:recipes/misc/pride_colorizer_lesbian": {
+    "criteria": {
+      "has_item": "2026-02-16 14:37:49 +0100"
+    },
+    "done": true
+  },
+  "hexcasting:recipes/misc/pride_colorizer_asexual": {
+    "criteria": {
+      "has_item": "2026-02-16 14:37:49 +0100"
+    },
+    "done": true
+  },
+  "hexcasting:recipes/misc/pride_colorizer_agender": {
+    "criteria": {
+      "has_item": "2026-02-16 14:37:49 +0100"
+    },
+    "done": true
+  },
+  "hexcasting:recipes/building_blocks/amethyst_tiles": {
+    "criteria": {
+      "has_item": "2026-02-16 14:37:49 +0100"
+    },
+    "done": true
+  },
+  "hexcasting:recipes/misc/dye_colorizer_red": {
+    "criteria": {
+      "has_item": "2026-02-16 14:37:49 +0100"
+    },
+    "done": true
+  },
+  "hexcasting:recipes/misc/dye_colorizer_gray": {
+    "criteria": {
+      "has_item": "2026-02-16 14:37:49 +0100"
+    },
+    "done": true
+  },
+  "hexcasting:recipes/misc/dye_colorizer_purple": {
+    "criteria": {
+      "has_item": "2026-02-16 14:37:49 +0100"
+    },
+    "done": true
+  },
+  "hexcasting:recipes/misc/pride_colorizer_pansexual": {
+    "criteria": {
+      "has_item": "2026-02-16 14:37:49 +0100"
+    },
+    "done": true
+  },
+  "hexcasting:recipes/misc/pride_colorizer_demigirl": {
+    "criteria": {
+      "has_item": "2026-02-16 14:37:49 +0100"
+    },
+    "done": true
+  },
+  "hexcasting:recipes/misc/pride_colorizer_genderqueer": {
+    "criteria": {
+      "has_item": "2026-02-16 14:37:49 +0100"
+    },
+    "done": true
+  },
+  "hexcasting:recipes/misc/pride_colorizer_plural": {
+    "criteria": {
+      "has_item": "2026-02-16 14:37:49 +0100"
+    },
+    "done": true
+  },
+  "hexcasting:recipes/misc/dye_colorizer_green": {
+    "criteria": {
+      "has_item": "2026-02-16 14:37:49 +0100"
+    },
+    "done": true
+  },
+  "hexcasting:recipes/misc/pride_colorizer_transgender": {
+    "criteria": {
+      "has_item": "2026-02-16 14:37:49 +0100"
+    },
+    "done": true
+  },
+  "hexcasting:recipes/misc/pride_colorizer_genderfluid": {
+    "criteria": {
+      "has_item": "2026-02-16 14:37:49 +0100"
+    },
+    "done": true
+  },
+  "hexcasting:recipes/misc/pride_colorizer_demiboy": {
+    "criteria": {
+      "has_item": "2026-02-16 14:37:49 +0100"
+    },
+    "done": true
+  },
+  "hexcasting:recipes/misc/dye_colorizer_light_blue": {
+    "criteria": {
+      "has_item": "2026-02-16 14:37:49 +0100"
+    },
+    "done": true
+  },
+  "hexcasting:recipes/misc/dye_colorizer_brown": {
+    "criteria": {
+      "has_item": "2026-02-16 14:37:49 +0100"
+    },
+    "done": true
+  },
+  "hexcasting:recipes/decorations/slate": {
+    "criteria": {
+      "has_item": "2026-02-16 14:37:49 +0100"
+    },
+    "done": true
+  },
+  "hexcasting:recipes/misc/dye_colorizer_black": {
+    "criteria": {
+      "has_item": "2026-02-16 14:37:49 +0100"
     },
     "done": true
   },
