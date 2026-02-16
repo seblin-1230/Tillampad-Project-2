@@ -1,0 +1,5 @@
+{
+  [ "is_peripheral.setting" ] = false,
+  [ "has_setup.setting" ] = true,
+  [ "network_id.setting" ] = 1,
+}

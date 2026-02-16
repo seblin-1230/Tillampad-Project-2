@@ -1,0 +1,16 @@
+{
+    "Lua.diagnostics.globals": [
+        "settings",
+        "term",
+        "read",
+        "colors",
+        "peripheral",
+        "rednet",
+        "sleep",
+        "fs",
+        "shell"
+    ],
+    "Lua.diagnostics.disable": [
+        "undefined-field"
+    ]
+}

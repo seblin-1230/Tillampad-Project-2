@@ -1,0 +1,10 @@
+{
+  [ "is_peripheral.setting" ] = true,
+  [ "type.setting" ] = "speaker",
+  [ "has_setup.setting" ] = true,
+  [ "network_id.setting" ] = 1,
+  [ "side.setting" ] = "right",
+  [ "device_id.settings" ] = "speaker_0",
+  [ "device_id.setting" ] = "speaker_0",
+  [ "network_id.settings" ] = 0,
+}
