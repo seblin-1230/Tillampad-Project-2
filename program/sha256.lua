@@ -1,3 +1,5 @@
+local inspect = require("libs.inspect")
+
 -- Steps:
 -- 1. Convert data to binary
 -- 2. Add 1 to the end
@@ -24,6 +26,11 @@ local k = { 0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111
 -- Source - https://stackoverflow.com/a/9080080
 -- Posted by jpjacobs, modified by community. See post 'Timeline' for change history
 -- Retrieved 2026-02-17, License - CC BY-SA 3.0
+
+---Convert decimal to big edian binary
+---@param num number
+---@param bits? number
+---@return string
 local function toBits(num,bits)
     -- returns a table of bits, most significant first.
     bits = bits or math.max(1, select(2, math.frexp(num)))
@@ -43,14 +50,44 @@ end
 ---Hash the input data with sha256
 ---@param input_data any
 local function hash(input_data)
+    -- Prepare the data 
     local data_binary = ""
     for character in string.gmatch(tostring(input_data), ".") do
         data_binary = data_binary .. toBits(string.byte(character), 8)
     end
 
-    print(data_binary)
+    local length_chunk = toBits(data_binary:len())
+    for i = 1, 64 - length_chunk:len() do
+        length_chunk = "0" .. length_chunk
+    end
+
+    data_binary = data_binary .. "1"
+    for i = 1, 512 - data_binary:len() % 512 - 64 do
+        data_binary = data_binary .. "0"
+    end
+
+    data_binary = data_binary .. length_chunk
+
+    -- Chunk loop
+    local chunks = {}
+    for c = 1, data_binary:len(), 512 do
+        local chunk = {}
+        local chunk_str = data_binary:sub(c, c + 512)
+        for i = 1, 512, 32 do
+            table.insert(chunk, chunk_str:sub(i, i + 31))
+        end
+        
+        for i = 1, 48 do
+            table.insert(chunk, "00000000000000000000000000000000")
+        end
+
+        table.insert(chunks, chunk)
+    end
+
+
+    print(inspect.inspect(chunks))
 end
 
 hash("Hello world")
 
-return {hash = hash}
+return { hash = hash }
