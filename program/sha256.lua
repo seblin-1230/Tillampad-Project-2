@@ -32,7 +32,7 @@ local function toBits(num,bits)
         t[b] = math.fmod(num, 2)
         num = math.floor((num - t[b]) / 2)
     end
-    return t
+    return table.concat(t)
 end
 
 
@@ -45,7 +45,7 @@ end
 local function hash(input_data)
     local data_binary = ""
     for character in string.gmatch(tostring(input_data), ".") do
-        data_binary = data_binary .. toBits(string.byte(character)) .. " "
+        data_binary = data_binary .. toBits(string.byte(character), 8)
     end
 
     print(data_binary)
