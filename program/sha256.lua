@@ -13,7 +13,7 @@ local inspect = require("libs.inspect")
 -- 10. 
 
 
-local h = { 0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19 }
+local base_hash_values = { 0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19 }
 local k = { 0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
             0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174, 
             0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da, 
@@ -51,43 +51,85 @@ end
 ---@param input_data any
 local function hash(input_data)
     -- Prepare the data 
-    local data_binary = ""
+    local message_block = ""
     for character in string.gmatch(tostring(input_data), ".") do
-        data_binary = data_binary .. toBits(string.byte(character), 8)
+        message_block = message_block .. toBits(string.byte(character), 8)
     end
 
-    local length_chunk = toBits(data_binary:len())
+    local length_chunk = toBits(message_block:len())
     for i = 1, 64 - length_chunk:len() do
         length_chunk = "0" .. length_chunk
     end
 
-    data_binary = data_binary .. "1"
-    for i = 1, 512 - data_binary:len() % 512 - 64 do
-        data_binary = data_binary .. "0"
+    message_block = message_block .. "1"
+    for i = 1, 512 - message_block:len() % 512 - 64 do
+        message_block = message_block .. "0"
     end
 
-    data_binary = data_binary .. length_chunk
+    message_block = message_block .. length_chunk
 
     -- Chunk loop
-    local chunks = {}
-    for c = 1, data_binary:len(), 512 do
-        local chunk = {}
-        local chunk_str = data_binary:sub(c, c + 512)
-        for i = 1, 512, 32 do
-            table.insert(chunk, chunk_str:sub(i, i + 31))
-        end
-        
-        for i = 1, 48 do
-            table.insert(chunk, "00000000000000000000000000000000")
+    local hash_values = { 0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19 }
+
+    for chunk_i = 1, message_block:len(), 512 do
+        local chunk = message_block:sub(chunk_i, chunk_i + 511)
+        local w = {}
+        for i = 1, chunk:len(), 32 do
+            table.insert(w, chunk:sub(i, i + 31))
         end
 
-        table.insert(chunks, chunk)
+        for i = 1, 48 do
+            table.insert(w, "00000000000000000000000000000000")
+        end
+
+        for i = 17, 48 do
+            local w1 = tonumber(w[i-15], 2)
+            local o0 = bit32.bxor(bit32.rrotate(w1, 7), bit32.rrotate(w1, 18), bit32.rshift(w1, 3))
+
+            local w14 = tonumber(w[i-2], 2)
+            local o1 = bit32.bxor(bit32.rrotate(w14, 17), bit32.rrotate(w14, 19), bit32.rshift(w14, 10))
+
+            w[i] = toBits(tonumber(w[i-16], 2) + o0 + tonumber(w[i-7], 2) + o1)
+        end
+
+        local a, b, c, d, e, f, g, h = hash_values[1], hash_values[2], hash_values[3], hash_values[4], hash_values[5], hash_values[6], hash_values[7], hash_values[8]
+
+        for i = 1, 64 do
+            local S0 = bit32.bxor(bit32.rrotate(a, 2), bit32.rrotate(a, 13), bit32.rrotate(a, 22))
+            local S1 = bit32.bxor(bit32.rrotate(e, 6), bit32.rrotate(e, 11), bit32.rrotate(a, 25))
+
+            local choice = bit32.bxor(bit32.band(e, f), bit32.band(bit32.bnot(e), g))
+            local majority = bit32.bxor(bit32.band(a, b), bit32.band(a, c), bit32.band(b, c))
+
+            print("i:", i, "w[i]:", w[i])
+            local temp1 = h + S1 + choice + w[i] + k[i]
+            local temp2 = S0 + majority
+
+            h = g
+            g = f
+            f = e
+            e = d + temp1
+            d = c
+            c = b
+            b = a
+            a = temp1 + temp2
+        end
+
+        hash_values[1] = hash_values[1] + a
+        hash_values[2] = hash_values[2] + b
+        hash_values[3] = hash_values[3] + c
+        hash_values[4] = hash_values[4] + d
+        hash_values[5] = hash_values[5] + e
+        hash_values[6] = hash_values[6] + f
+        hash_values[7] = hash_values[7] + g
+        hash_values[8] = hash_values[8] + h
     end
 
-
-    print(inspect.inspect(chunks))
+    return toBits(hash_values[1], 32) .. toBits(hash_values[2], 32) .. toBits(hash_values[3], 32) .. toBits(hash_values[4], 32) .. toBits(hash_values[5], 32) .. toBits(hash_values[6], 32) .. toBits(hash_values[7], 32) .. toBits(hash_values[8], 32)
 end
 
-hash("Hello world")
+print(hash("..................................................Hello world"))
+
+-- print(toBits(bit32.bxor(tonumber("01011100010111000101110001011100", 2), tonumber("10001011100010111000101110001011", 2), tonumber("00000101110001011100010111000101", 2)), 32))
 
 return { hash = hash }
