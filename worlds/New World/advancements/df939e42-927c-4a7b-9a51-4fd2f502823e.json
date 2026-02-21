@@ -682,5 +682,41 @@
     },
     "done": true
   },
+  "turtlechargingstation:recipes/misc/turtle_charging_station": {
+    "criteria": {
+      "has_turtle_advanced": "2026-02-21 10:41:22 +0100"
+    },
+    "done": true
+  },
+  "computercraft:recipes/redstone/turtle_advanced_overlays/turtle_rainbow_overlay": {
+    "criteria": {
+      "has_turtle": "2026-02-21 10:41:22 +0100"
+    },
+    "done": true
+  },
+  "computercraft:recipes/redstone/turtle_advanced/computercraft/wireless_modem_advanced": {
+    "criteria": {
+      "has_items": "2026-02-21 10:41:22 +0100"
+    },
+    "done": true
+  },
+  "turtlechargingstation:recipes/misc/thundercharge_dynamo": {
+    "criteria": {
+      "has_turtle_advanced": "2026-02-21 10:41:22 +0100"
+    },
+    "done": true
+  },
+  "computercraft:recipes/redstone/turtle_advanced_overlays/turtle_trans_overlay": {
+    "criteria": {
+      "has_turtle": "2026-02-21 10:41:22 +0100"
+    },
+    "done": true
+  },
+  "ccchunkloader:recipes/misc/chunkloader_manager": {
+    "criteria": {
+      "has_chunkloader_upgrade": "2026-02-21 10:43:56 +0100"
+    },
+    "done": true
+  },
   "DataVersion": 3465
 }
