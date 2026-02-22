@@ -719,5 +719,11 @@
     },
     "done": true
   },
+  "computercraft:recipes/redstone/computer_command": {
+    "criteria": {
+      "has_components": "2026-02-22 22:40:21 +0100"
+    },
+    "done": true
+  },
   "DataVersion": 3465
 }
