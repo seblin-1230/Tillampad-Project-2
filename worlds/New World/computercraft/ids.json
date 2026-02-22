@@ -1,7 +1,8 @@
 {
   "peripheral.focal_port": 1,
-  "computer": 14,
-  "peripheral.computer": 2,
+  "computer": 15,
+  "peripheral.computer": 4,
   "peripheral.redstone_relay": 0,
-  "peripheral.modem": 1
+  "peripheral.modem": 1,
+  "peripheral.turtle": 1
 }
