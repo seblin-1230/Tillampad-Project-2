@@ -725,5 +725,23 @@
     },
     "done": true
   },
+  "create:recipes/misc/crafting/appliances/crafting_blueprint": {
+    "criteria": {
+      "has_item": "2026-02-23 10:08:06 +0100"
+    },
+    "done": true
+  },
+  "computercraft:recipes/redstone/turtle_advanced/minecraft/crafting_table": {
+    "criteria": {
+      "has_items": "2026-02-23 10:08:06 +0100"
+    },
+    "done": true
+  },
+  "minecraft:story/root": {
+    "criteria": {
+      "crafting_table": "2026-02-23 10:08:06 +0100"
+    },
+    "done": true
+  },
   "DataVersion": 3465
 }
