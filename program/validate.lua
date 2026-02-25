@@ -50,3 +50,25 @@ local function hash_station(station_data)
 end
 
 hash_station({station_id = 1, computer_id = 18, arrival_coordinates = vector.new(250, 140, 255), description = "The first station", teleport_coordinates = vector.new(251, 140, 257)})
+local sha256 = require("sha256")
+
+local function validate()
+    
+end
+
+local function hash_station()
+    local data = ""
+    local files = fs.list("/station/")
+
+    for i = 1, #files do
+        local file = assert(fs.open("/station/" .. files[i], "r"))
+        data = data .. file.read()
+        file.close()
+    end
+
+    data = data .. settings.get("station_description") .. settings.get("arrival_position") .. settings.get("transfer_position")
+
+    return sha256.hash(data)
+end
+
+return {validate = validate, hash_station()}
