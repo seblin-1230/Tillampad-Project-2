@@ -7,5 +7,9 @@
     "Lua.runtime.builtin": {
         "io": "disable",
         "os": "disable"
-    }
+    },
+    "Lua.workspace.ignoreDir": [
+        ".vscode",
+        "./worlds"
+    ]
 }
