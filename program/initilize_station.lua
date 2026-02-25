@@ -1,5 +1,12 @@
 local cc_strings = require("cc.strings")
 
+---@type Station
+local station_data = {}
+
+---@type Station[]
+local other_stations = {}
+local station_hashes = {}
+
 local function check_peripherals()
     local needed_peripherals = {
         "modem",
@@ -33,40 +40,67 @@ local function check_peripherals()
     return any_missing
 end
 
+local function copy_files()
+    fs.copy("drive/validate.lua", "program/validate.lua")
+    fs.copy("drive/sha256.lua", "program/sha256.lua")
+    fs.copy("drive/station.lua", "program/station.lua")
+    print("Files copied from disk...\n")
+end
+
 local function define_settings()
-    settings.define("station_id", { description = "The station id", type = "number" })
-    settings.define("station_description", { description = "The stations description", type = "string" })
-    settings.define("arrival_position", { description = "The position a user should arrive on when the station is the destination", type = "table" })
-    settings.define("transfer_position", { description = "The position a user should arrive on when the station is used as an inbetween", type = "table" })
+    settings.define("station_data", { description = "The data about this station", type = "table" })
 
     write("Station desc: ")
-    settings.set("station_description", read())
+    station_data.description = read()
     print()
 
     write("Arival position \"x,y,z\": ")
     local pos = cc_strings.split(read(), "[^%d]+")
-    settings.set("arrival_position", vector.new(assert(tonumber(pos[1])), assert(tonumber(pos[2])), assert(tonumber(pos[3]))))
+    station_data.arrival_coordinates = vector.new(assert(tonumber(pos[1])), assert(tonumber(pos[2])), assert(tonumber(pos[3])))
     print()
 
     write("Transfer position \"x,y,z\": ")
     local pos = cc_strings.split(read(), "[^%d]+")
-    settings.set("transfer_position", vector.new(assert(tonumber(pos[1])), assert(tonumber(pos[2])), assert(tonumber(pos[3]))))
+    station_data.teleport_coordinates = vector.new(assert(tonumber(pos[1])), assert(tonumber(pos[2])), assert(tonumber(pos[3])))
     print()
 
-    rednet.host("add station", settings.get("transfer_position"))
+    rednet.broadcast(true, "get-new-id")
+    
+    write("Station ID: ")
+    station_data.station_id = assert(tonumber(read()))
+    print()
 
-    local controller_id = rednet.lookup("add station", "station_controller")
-    print(controller_id, type(controller_id))
+    station_data.computer_id = os.getComputerID()
+
+    settings.set("station_data", station_data)
+
+    return true
 end
 
+local function annonce_existance()
+    rednet.broadcast(station_data, "new_staion")
+
+    repeat
+        local id, message = rednet.receive("new_staion", 5)
+
+        if id then
+            print("Recived data from station " .. id)
+            ---@cast message Station
+            other_stations[message.station_id] = message
+        end
+    until id == nil
+end
 
 if check_peripherals() then goto quit end
 print()
-
+copy_files()
 
 local modem = assert(peripheral.find("modem"))
 rednet.open(peripheral.getName(modem))
 
-local settings_defined = define_settings()
+define_settings()
+annonce_existance()
 
+
+settings.save()
 ::quit::
