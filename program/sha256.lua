@@ -84,8 +84,7 @@ local function hash(input_data)
         local a, b, c, d, e, f, g, h = hash_values[1], hash_values[2], hash_values[3], hash_values[4], hash_values[5],
             hash_values[6], hash_values[7], hash_values[8]
 
-        print("i: " .. tostring(0) .. " variables: ", toBits(a, 32), toBits(b, 32), toBits(c, 32), toBits(d, 32),
-            toBits(e, 32), toBits(f, 32), toBits(g, 32), toBits(h, 32))
+        
 
         for i = 1, 64 do
             local S0 = bit32.bxor(
@@ -123,8 +122,6 @@ local function hash(input_data)
             c = b
             b = a
             a = add32(temp1, temp2)
-            print("i: " .. tostring(i) .. " variables: ", toBits(a, 32), toBits(b, 32), toBits(c, 32), toBits(d, 32),
-                toBits(e, 32), toBits(f, 32), toBits(g, 32), toBits(h, 32))
         end
 
         hash_values[1] = add32(hash_values[1], a)
