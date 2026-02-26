@@ -1,0 +1,36 @@
+Requirements for staitons:
+- Can't store own hash
+- Can't assosiate any station with a hash
+- Some way to make sure not everybody can create a new station
+- Every station has to hash themself and the other stations every time a teleport request is started
+
+Requirements for hashing:
+- I think it need to be cryptograficly secure
+
+Ideas:
+1. Include the computer id in the hash to make sure it can't be computed from other computers (Security)
+2. Don't send the computer id with the data but use the computer id from rednet.recive (Security)
+3. Skip rom folder (Speed)
+4. Using merkle trees (Speed)
+5. If I do 2 I don't need to wory about storing this stations hash and can use merkle trees
+6. Using a nonce and secret key in the hashing for stricter security
+
+Problems:
+- Anybody can see and change the data on the station computers whenevery they want, this is why hashing every time is nessicery, can not garuntie that the stations have not been changed
+- Anybody can copy the station files and reverse engineer a initilise staiton script creating a fully valid station, Only way i can think of to solve this is a password but i don't know how i would store that
+- Finding a hashing function that is fast enough to not cause an annoying 30 second delay every time it verifys a station
+
+Full teleport logic:
+Every send and request comes with os.epoch() and is verified on the reciving side before responding
+
+1. User is at Station A
+2. User selects that they want to teleport to Station B
+3. Station A sends a verification request and a random nonceto Station B
+5. Station B calculates hash(file_hash + computer_id + secret_key + nonce) and sends the result and os.epoch() to Station A
+6. Station A calculates hash(file_hash + rednet_response_computer_id + secret_key + nonce) and compares it to Station B:s response
+7. If the hashes match Station A sends a teleport request to Station B and the hash it calculated
+7,5. If Station B is a transfer station on the way to for example Station C Station A also sends the list of stations to teleport to with Station B removed from it
+8. Station B compares the hashes on it's side and if they match accepts Station A:s teleport request
+9. Station A waits for user to move into teleportation chamber
+10. Station A teleports user to Station B
+10,5. If Station B is a transfer station it restarts the process by sendign a verification request to the next station in the list
