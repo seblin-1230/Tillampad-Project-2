@@ -1,0 +1,10 @@
+{
+  "theme": "obsidian",
+  "baseFontSize": 20,
+  "baseFontSizeAction": true,
+  "enabledCssSnippets": [
+    "no_under_line",
+    "no_underline"
+  ],
+  "nativeMenus": false
+}

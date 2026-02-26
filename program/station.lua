@@ -1,4 +1,4 @@
----@alias Station {station_id: integer, computer_id: integer, description: string, arrival_coordinates: ccTweaked.Vector, teleport_coordinates: ccTweaked.Vector}
+---@alias Station {station_id: integer, description: string, arrival_coordinates: ccTweaked.Vector, teleport_coordinates: ccTweaked.Vector}
 
 local focal_port = peripheral.find("focal_port") or error("No focal port connected")
 local impetus = peripheral.find("cleric_impetus") or error("No spell circle connected")
