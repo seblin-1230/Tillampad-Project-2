@@ -2,10 +2,14 @@
     "Lua.workspace.library": [
         "${addons}/cc-tweaked/module/library"
     ],
-    "Lua.runtime.version": "Lua 5.2",
+    "Lua.runtime.version": "Lua 5.3",
     "Lua.workspace.checkThirdParty": true,
     "Lua.runtime.builtin": {
         "io": "disable",
         "os": "disable"
-    }
+    },
+    "Lua.workspace.ignoreDir": [
+        ".vscode",
+        "./worlds"
+    ]
 }
