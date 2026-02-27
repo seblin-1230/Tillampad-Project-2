@@ -1,6 +1,14 @@
+## Create session key
+	Station A is the station that was instructed to generate the key
+	Station B represents all other stations in the network
+	Admin is the pocket computer that can instruct a station to generate a session key
+1. Admin sends "generate key" to Staiton A via rednet
+2. Station A sends a [[Terms#Nonce|nonce]] to admin
+3. Admin computes $H_1$ = hash(nonce + )
+Admin is a disk and a admin user can tell a staiton to restart the network by inserting the master disk. the computer the outputs a nonce and asks the admin user for the password  
+4. Station A generates $p = big_prime
 ## Routing logic
 1. Takes a station or set of coordinates and outputs a list of stations needed to reach the destination (This is a work in progress, want to get the rest of the station logic first)
-
 ## Teleport logic
 1. User is at Station A and selects a destination
 2. Station A sets route = Routing_Logic(destination) (in this case B -> C -> destination)
@@ -28,6 +36,14 @@
 24. If it was it does the verification handshake with the station
 25. Teleport user to destination
 
+## Server restart logic
+	Station A is the station used by an admin to initilize the network
+	Station B represents all other stations in the network
+	Admin in any pocket computer with the master key on it
+1. Every station waits for either a rednet message from an admin or another station
+2. Station A recives a message from admin containing a message to wake up
+3. Station A and admin 
+4. The admin computes $H_1$ = hash([[Terms#Nonce|nonce]] + os.computerID() + )
 ## Adding station logic
 1. Station A is new
 2. Station B is existing
@@ -36,4 +52,14 @@
 5. Station B generates [[Terms#Nonce|nonce]] and caches Station A:s data
 6. Station B sends an [[Terms#Add station verification|add station verification]] using [[Terms#Nonce|nonce]] to Station A
 7. Station A calculates $H_1$ = hash([[Terms#System hash|system_hash]] + computerID() + [[Terms#Station data|station_data]] + [[Terms#Secret key|secret_key]] + [[Terms#Nonce|nonce]]])
-8. 
+
+
+## Vulnerabilities
+- When the server restarts an attacker can:
+	1. Create their own fake station that only has logic for reciving master keys during network restarts
+	2. Go to Sation A, frecuently used for network restarts
+	3. Add their own fake station to Station A:s list
+	4. When an admin then uses Station A to restart the network the master key is sent to the fake station
+	5. The attacker can then copy all the files and peripherals from an existing station and hash it to create their own  fully valid staiton
+	6. This station can have a valid [[Terms#System hash|system hash]] hard coded
+	7. This station can be trapped in any way and the network would have no idea
