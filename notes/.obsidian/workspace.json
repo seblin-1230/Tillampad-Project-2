@@ -35,8 +35,7 @@
               "title": "Terms"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -195,10 +194,10 @@
       "bases:Create new base": false
     }
   },
-  "active": "5bac6ee8b8834c11",
+  "active": "343560f1207a518d",
   "lastOpenFiles": [
-    "Station Logic.md",
     "Terms.md",
+    "Station Logic.md",
     "[Terms.md",
     "Nonce.md",
     "Station-logic.txt"
