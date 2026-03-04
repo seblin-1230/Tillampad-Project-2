@@ -22,6 +22,10 @@ local function bytes_to_int(str,endian,signed)
     return n
 end
 
+---Convert an integer into a hex string padded by "pad" using 0s
+---@param num number
+---@param pad integer
+---@return string
 local function int_to_hex(num, pad)
     local format = string.format("%%0%dx", pad)
     return string.format(format, num)
@@ -51,6 +55,34 @@ local function initilize_matrix(key, block_count, nonce)
     end
 
     return matrix
+end
+
+---A quater round of chacha encryption
+---@param matrix_state integer[]
+---@param a_i integer
+---@param b_i integer
+---@param c_i integer
+---@param d_i integer
+local function quater_round(matrix_state, a_i, b_i, c_i, d_i)
+    local a, b, c, d = matrix_state[a_i], matrix_state[b_i], matrix_state[c_i], matrix_state[d_i]
+
+    a = a + b
+    d = bit32.bxor(d, a)
+    d = bit32.lrotate(d, 16)
+
+    c = c + d
+    b = bit32.bxor(b, c)
+    b = bit32.lrotate(b, 12)
+
+    a = a + b
+    d = bit32.bxor(d, a)
+    d = bit32.lrotate(d, 8)
+
+    c = c + d
+    b = bit32.bxor(b, c)
+    b = bit32.lrotate(b, 7)
+
+    matrix_state[a_i], matrix_state[b_i], matrix_state[c_i], matrix_state[d_i] = a, b, c, d
 end
 
 ---Encrypts text using ChaCha20
