@@ -3,21 +3,21 @@
 ---@param endian "big"|"little"
 ---@param signed boolean
 ---@return integer
-local function bytes_to_int(str,endian,signed)
-    local t={str:byte(1,-1)}
-    if endian=="big" then --reverse bytes
-        local tt={}
-        for k=1,#t do
-            tt[#t-k+1]=t[k]
+local function bytes_to_int(str, endian, signed)
+    local t = { str:byte(1, -1) }
+    if endian == "big" then --reverse bytes
+        local tt = {}
+        for k = 1, #t do
+            tt[#t - k + 1] = t[k]
         end
-        t=tt
+        t = tt
     end
-    local n=0
-    for k=1,#t do
-        n=n+t[k]*2^((k-1)*8)
+    local n = 0
+    for k = 1, #t do
+        n = n + t[k] * 2 ^ ((k - 1) * 8)
     end
     if signed then
-        n = (n > 2^(#t*8-1) -1) and (n - 2^(#t*8)) or n -- if last bit set, negative.
+        n = (n > 2 ^ (#t * 8 - 1) - 1) and (n - 2 ^ (#t * 8)) or n -- if last bit set, negative.
     end
     return n
 end
@@ -34,7 +34,7 @@ end
 ---Reutrns a nonce, current implemention temporary until i implement better randomness
 ---@return [number,number,number] nonce An array containing three 32 bit random numbers
 local function generate_nonce()
-    return {math.random(0, 0xFFFFFFFF), math.random(0, 0xFFFFFFFF), math.random(0, 0xFFFFFFFF)}
+    return { math.random(0, 0xFFFFFFFF), math.random(0, 0xFFFFFFFF), math.random(0, 0xFFFFFFFF) }
 end
 
 ---Generate the matrix state
@@ -42,10 +42,10 @@ end
 ---@param block_count number The current block count
 ---@param nonce [number, number, number] Three random 32 bit numbers
 local function initilize_matrix(key, block_count, nonce)
-    local matrix = {0x61707865, 0x3320646e, 0x79622d32, 0x6b206574}
-    
+    local matrix = { 0x61707865, 0x3320646e, 0x79622d32, 0x6b206574 }
+
     for i = 1, #key, 4 do
-        table.insert(matrix, bytes_to_int(string.sub(key, i, i+3), "little", false))
+        table.insert(matrix, bytes_to_int(string.sub(key, i, i + 3), "little", false))
     end
 
     table.insert(matrix, block_count)
@@ -115,14 +115,21 @@ local function encrypt(plaintext, key, nonce)
     end
     textutils.pagedTabulate(print_matrix)
 
-    return "temp", nonce
+    local ciphertext = ""
+    for i = 1, #plaintext, 512 do
+        ciphertext = ciphertext .. encrypt_chunk(matrix_state, string.sub(plaintext, i, i+511))
+    end
+
+    return ciphertext, nonce
 end
 
-local key = string.char(0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f)
-local text = [[Gary didn't understand why Doug went upstairs to get one dollar bills when he invited him to go cow tipping.
+local key = string.char(0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
+    0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f)
+local text =
+[[Gary didn't understand why Doug went upstairs to get one dollar bills when he invited him to go cow tipping.
 She wore green lipstick like a fashion icon.
 His son quipped that power bars were nothing more than adult candy bars.
 The sight of his goatee made me want to run and hide under my sister-in-law's bed.
 There is no better feeling than staring at a wall with closed eyes.]]
 
-print(encrypt(text, key, {0, 0, 0}))
+print(encrypt(text, key, { 0, 0, 0 }))
