@@ -24,6 +24,38 @@ local function bytes_to_int(str, endian, signed)
     return n
 end
 
+---Convert an integer to a string using the nubmers as bytes, taken from same source as bytes-to_int
+---@param num integer
+---@param endian "big"|"little"
+---@param signed boolean
+---@return string
+local function int_to_bytes(num, endian, signed)
+    if num < 0 and not signed then
+        num = -num
+        print "warning, dropping sign from number converting to unsigned"
+    end
+    local res = {}
+    local n = math.ceil(select(2, math.frexp(num)) / 8) -- number of bytes to be used.
+    if signed and num < 0 then
+        num = num + 2 ^ n
+    end
+    for k = n, 1, -1 do -- 256 = 2^8 bits per char.
+        local mul = 2 ^ (8 * (k - 1))
+        res[k] = math.floor(num / mul)
+        num = num - res[k] * mul
+    end
+    assert(num == 0)
+    if endian == "big" then
+        local t = {}
+        for k = 1, n do
+            t[k] = res[n - k + 1]
+        end
+        res = t
+    end
+    return string.char(table.unpack(res))
+end
+
+
 ---Split a string into "size" sized chunks
 ---@param str string
 ---@param size integer
@@ -31,7 +63,7 @@ end
 local function chunk_string(str, size)
     local chunks = {}
     for i = 1, #str, size do
-        table.insert(chunks, string.sub(str, i, i+size-1))
+        table.insert(chunks, string.sub(str, i, i + size - 1))
     end
 
     return chunks
@@ -47,7 +79,7 @@ local function int_to_hex(num, pad)
 end
 
 local function split_()
-    
+
 end
 
 ---Reutrns a nonce, current implemention temporary until i implement better randomness
@@ -85,19 +117,19 @@ end
 local function quater_round(matrix_state, a_i, b_i, c_i, d_i)
     local a, b, c, d = matrix_state[a_i], matrix_state[b_i], matrix_state[c_i], matrix_state[d_i]
 
-    a = a + b
+    a = utils.add32(a, b)
     d = bit32.bxor(d, a)
     d = bit32.lrotate(d, 16)
 
-    c = c + d
+    c = utils.add32(c, d)
     b = bit32.bxor(b, c)
     b = bit32.lrotate(b, 12)
 
-    a = a + b
+    a = utils.add32(a, b)
     d = bit32.bxor(d, a)
     d = bit32.lrotate(d, 8)
 
-    c = c + d
+    c = utils.add32(c, d)
     b = bit32.bxor(b, c)
     b = bit32.lrotate(b, 7)
 
@@ -118,9 +150,9 @@ local function double_round(matrix_state)
 end
 
 local function serialize_matrix(matrix_state)
-    local keystream_block = ""
+    local keystream_block = {}
     for _, value in ipairs(matrix_state) do
-        keystream_block = keystream_block .. "tmo"
+
     end
 end
 
@@ -132,12 +164,36 @@ end
 local function encrypt_chunk(plaintext_chunk, key, block_count, nonce)
     local matrix_state = initilize_matrix(key, block_count, nonce)
     local initial_matrix_state = utils.copy_table(matrix_state)
-    
-    for i = 1, 1 do
+
+    local print_matrix = {}
+    for i, value in ipairs(matrix_state) do
+        table.insert(print_matrix, int_to_hex(value, 8))
+    end
+    textutils.pagedTabulate(print_matrix)
+
+    for i = 1, 10 do
         double_round(matrix_state)
+        local print_matrix = {}
+        for i, value in ipairs(matrix_state) do
+            table.insert(print_matrix, int_to_hex(value, 8))
+        end
+        textutils.pagedTabulate(print_matrix)
+
+        sleep(2)
     end
 
-    
+    for i = 1, #initial_matrix_state do
+        matrix_state[i] = utils.add32(matrix_state[i], initial_matrix_state[i])
+    end
+
+    local ciphertext_chunk = ""
+    for i, sub_chunk in ipairs(chunk_string(plaintext_chunk, 32)) do
+        local plaintext_int = bytes_to_int(sub_chunk, "big", false)
+        local ciphertext_int = bit32.bxor(plaintext_int, matrix_state[i])
+        ciphertext_chunk = ciphertext_chunk .. int_to_bytes(ciphertext_int, "little", false)
+    end
+
+    return ciphertext_chunk
 end
 
 ---Encrypts text using ChaCha20
@@ -150,8 +206,12 @@ local function encrypt(plaintext, key, nonce)
     if nonce == nil then nonce = generate_nonce() end
 
     local ciphertext = ""
-    for i = 1, #plaintext, 512 do
-        ciphertext = ciphertext .. encrypt_chunk(string.sub(plaintext, i, i+511), key, i, nonce)
+    local block_count = 1
+    for i = 1, #plaintext, 64 do
+        print(string.sub(plaintext, i, i + 63))
+        ciphertext = ciphertext .. encrypt_chunk(string.sub(plaintext, i, i + 511), key, block_count, nonce)
+
+        block_count = block_count + 1
     end
 
     return ciphertext, nonce
@@ -160,21 +220,18 @@ end
 local key = string.char(0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
     0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f)
 local text =
-[[Gary didn't understand why Doug went upstairs to get one dollar bills when he invited him to go cow tipping.
-She wore green lipstick like a fashion icon.
-His son quipped that power bars were nothing more than adult candy bars.
-The sight of his goatee made me want to run and hide under my sister-in-law's bed.
-There is no better feeling than staring at a wall with closed eyes.]]
+[[Gary didn't understand why Doug went upstairs to get one dollar]]
 
-print(encrypt(text, key, { 0, 0, 0 }))
+local ciphertext, nonce = encrypt(text, key, { 0, 0, 0 })
+textutils.pagedPrint(ciphertext)
 
 
 
 
 
 
-    -- local print_matrix = {}
-    -- for i, value in ipairs(matrix_state) do
-    --     table.insert(print_matrix, int_to_hex(value, 8))
-    -- end
-    -- textutils.pagedTabulate(print_matrix)
+-- local print_matrix = {}
+-- for i, value in ipairs(matrix_state) do
+--     table.insert(print_matrix, int_to_hex(value, 8))
+-- end
+-- textutils.pagedTabulate(print_matrix)
