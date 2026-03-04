@@ -11,4 +11,16 @@ function utils.copy_table(table1)
     return table2
 end
 
+---Takes arbitrary number of numbers and adds them in mod 32
+---@param ... number
+---@return number
+function utils.add32(...)
+    local sum = 0
+    for _, number in ipairs(arg) do
+        sum = sum + number
+    end
+
+    return sum % 2^32
+end
+
 return utils
