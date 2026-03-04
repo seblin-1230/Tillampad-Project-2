@@ -1,3 +1,5 @@
+local utils = require("utils")
+
 ---Convert a string in to a integer based on its bytes, taken from (https://stackoverflow.com/questions/5241799/lua-dealing-with-non-ascii-byte-streams-byteorder-change)
 ---@param str string
 ---@param endian "big"|"little"
@@ -29,6 +31,10 @@ end
 local function int_to_hex(num, pad)
     local format = string.format("%%0%dx", pad)
     return string.format(format, num)
+end
+
+local function split_()
+    
 end
 
 ---Reutrns a nonce, current implemention temporary until i implement better randomness
@@ -98,6 +104,29 @@ local function double_round(matrix_state)
     quater_round(matrix_state, 4, 5, 10, 15)
 end
 
+local function serialize_matrix(matrix_state)
+    local keystream_block = ""
+    for _, value in ipairs(matrix_state) do
+        keystream_block = keystream_block .. "tmo"
+    end
+end
+
+---Encrypt a 512 bit chunk of the plaintext
+---@param plaintext_chunk string
+---@param key string
+---@param block_count integer
+---@param nonce [integer, integer, integer]
+local function encrypt_chunk(plaintext_chunk, key, block_count, nonce)
+    local matrix_state = initilize_matrix(key, block_count, nonce)
+    local initial_matrix_state = utils.copy_table(matrix_state)
+    
+    for i = 1, 1 do
+        double_round(matrix_state)
+    end
+
+    
+end
+
 ---Encrypts text using ChaCha20
 ---@param plaintext string The text to encrypt
 ---@param key string A 32 character long string
@@ -107,17 +136,9 @@ end
 local function encrypt(plaintext, key, nonce)
     if nonce == nil then nonce = generate_nonce() end
 
-    local matrix_state = initilize_matrix(key, 1, nonce)
-
-    local print_matrix = {}
-    for i, value in ipairs(matrix_state) do
-        table.insert(print_matrix, int_to_hex(value, 8))
-    end
-    textutils.pagedTabulate(print_matrix)
-
     local ciphertext = ""
     for i = 1, #plaintext, 512 do
-        ciphertext = ciphertext .. encrypt_chunk(matrix_state, string.sub(plaintext, i, i+511))
+        ciphertext = ciphertext .. encrypt_chunk(string.sub(plaintext, i, i+511), key, i, nonce)
     end
 
     return ciphertext, nonce
@@ -133,3 +154,14 @@ The sight of his goatee made me want to run and hide under my sister-in-law's be
 There is no better feeling than staring at a wall with closed eyes.]]
 
 print(encrypt(text, key, { 0, 0, 0 }))
+
+
+
+
+
+
+    -- local print_matrix = {}
+    -- for i, value in ipairs(matrix_state) do
+    --     table.insert(print_matrix, int_to_hex(value, 8))
+    -- end
+    -- textutils.pagedTabulate(print_matrix)

@@ -1,6 +1,6 @@
 local utils = {}
 
----Create a shallow copy of a table
+---Create a shallow copy of a table1
 ---@param table1 table
 ---@return table
 function utils.copy_table(table1)
@@ -10,3 +10,5 @@ function utils.copy_table(table1)
     end
     return table2
 end
+
+return utils
