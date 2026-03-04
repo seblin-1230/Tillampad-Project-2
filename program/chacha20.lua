@@ -1,8 +1,33 @@
-local function string_to_bytes()
-    
+---Convert a string in to a integer based on its bytes, taken from (https://stackoverflow.com/questions/5241799/lua-dealing-with-non-ascii-byte-streams-byteorder-change)
+---@param str string
+---@param endian "big"|"little"
+---@param signed boolean
+---@return integer
+local function bytes_to_int(str,endian,signed)
+    local t={str:byte(1,-1)}
+    if endian=="big" then --reverse bytes
+        local tt={}
+        for k=1,#t do
+            tt[#t-k+1]=t[k]
+        end
+        t=tt
+    end
+    local n=0
+    for k=1,#t do
+        n=n+t[k]*2^((k-1)*8)
+    end
+    if signed then
+        n = (n > 2^(#t*8-1) -1) and (n - 2^(#t*8)) or n -- if last bit set, negative.
+    end
+    return n
 end
 
----Reutrns a nonce, current implemention temporary untill i implement better randomness
+local function int_to_hex(num, pad)
+    local format = string.format("%%0%dx", pad)
+    return string.format(format, num)
+end
+
+---Reutrns a nonce, current implemention temporary until i implement better randomness
 ---@return [number,number,number] nonce An array containing three 32 bit random numbers
 local function generate_nonce()
     return {math.random(0, 0xFFFFFFFF), math.random(0, 0xFFFFFFFF), math.random(0, 0xFFFFFFFF)}
@@ -14,13 +39,21 @@ end
 ---@param nonce [number, number, number] Three random 32 bit numbers
 local function initilize_matrix(key, block_count, nonce)
     local matrix = {0x61707865, 0x3320646e, 0x79622d32, 0x6b206574}
-    print(key)
-    for i = 1, #key do
-        print(string.byte(key[i]))
+    
+    for i = 1, #key, 4 do
+        table.insert(matrix, bytes_to_int(string.sub(key, i, i+3), "little", false))
     end
+
+    table.insert(matrix, block_count)
+
+    for _, sub_nonce in ipairs(nonce) do
+        table.insert(matrix, sub_nonce)
+    end
+
+    return matrix
 end
 
----comment
+---Encrypts text using ChaCha20
 ---@param plaintext string The text to encrypt
 ---@param key string A 32 character long string
 ---@param nonce? [number, number, number] Three random 32 bit numbers, if unspecified automaticaly generated.
@@ -31,9 +64,11 @@ local function encrypt(plaintext, key, nonce)
 
     local matrix_state = initilize_matrix(key, 1, nonce)
 
-    for i, word in ipairs(matrix_state) do
-        print(i, string.format("%08x", word))
+    local print_matrix = {}
+    for i, value in ipairs(matrix_state) do
+        table.insert(print_matrix, int_to_hex(value, 8))
     end
+    textutils.pagedTabulate(print_matrix)
 
     return "temp", nonce
 end
