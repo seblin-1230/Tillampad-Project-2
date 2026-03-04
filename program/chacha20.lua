@@ -117,36 +117,98 @@ end
 local function quater_round(matrix_state, a_i, b_i, c_i, d_i)
     local a, b, c, d = matrix_state[a_i], matrix_state[b_i], matrix_state[c_i], matrix_state[d_i]
 
+    print(string.format("a1: %08x b1: %08x c1: %08x d1: %08x", a, b, c, d))
+
     a = utils.add32(a, b)
     d = bit32.bxor(d, a)
     d = bit32.lrotate(d, 16)
+    print(string.format("a2: %08x b2: %08x c2: %08x d2: %08x", a, b, c, d))
+
 
     c = utils.add32(c, d)
     b = bit32.bxor(b, c)
     b = bit32.lrotate(b, 12)
+    print(string.format("a3: %08x b3: %08x c3: %08x d3: %08x", a, b, c, d))
 
     a = utils.add32(a, b)
     d = bit32.bxor(d, a)
     d = bit32.lrotate(d, 8)
+    print(string.format("a4: %08x b4: %08x c4: %08x d4: %08x", a, b, c, d))
 
     c = utils.add32(c, d)
     b = bit32.bxor(b, c)
     b = bit32.lrotate(b, 7)
 
     matrix_state[a_i], matrix_state[b_i], matrix_state[c_i], matrix_state[d_i] = a, b, c, d
+    print(string.format("a5: %s b5: %s c5: %s d5: %s", int_to_hex(a, 8), int_to_hex(b, 8), int_to_hex(c, 8), int_to_hex(d, 8)))
 end
 
 ---Does both a collumn round and a diagonal round on the matrix state
 ---@param matrix_state integer[]
 local function double_round(matrix_state)
     quater_round(matrix_state, 1, 5, 9, 13) -- Column rounds
+    local print_matrix = {}
+    for i, value in ipairs(matrix_state) do
+        table.insert(print_matrix, int_to_hex(value, 8))
+    end
+    textutils.pagedTabulate(print_matrix)
+    sleep(1)
+
     quater_round(matrix_state, 2, 6, 10, 14)
+    local print_matrix = {}
+    for i, value in ipairs(matrix_state) do
+        table.insert(print_matrix, int_to_hex(value, 8))
+    end
+    textutils.pagedTabulate(print_matrix)
+    sleep(1)
+    
     quater_round(matrix_state, 3, 7, 11, 15)
+    local print_matrix = {}
+    for i, value in ipairs(matrix_state) do
+        table.insert(print_matrix, int_to_hex(value, 8))
+    end
+    textutils.pagedTabulate(print_matrix)
+    sleep(1)
+
     quater_round(matrix_state, 4, 8, 12, 16)
+    local print_matrix = {}
+    for i, value in ipairs(matrix_state) do
+        table.insert(print_matrix, int_to_hex(value, 8))
+    end
+    textutils.pagedTabulate(print_matrix)
+    sleep(1)
+
     quater_round(matrix_state, 1, 6, 11, 16) -- Diagonal rounds
+    local print_matrix = {}
+    for i, value in ipairs(matrix_state) do
+        table.insert(print_matrix, int_to_hex(value, 8))
+    end
+    textutils.pagedTabulate(print_matrix)
+    sleep(1)
+
     quater_round(matrix_state, 2, 7, 12, 13)
+    local print_matrix = {}
+    for i, value in ipairs(matrix_state) do
+        table.insert(print_matrix, int_to_hex(value, 8))
+    end
+    textutils.pagedTabulate(print_matrix)
+    sleep(1)
+
     quater_round(matrix_state, 3, 8, 9, 14)
+    local print_matrix = {}
+    for i, value in ipairs(matrix_state) do
+        table.insert(print_matrix, int_to_hex(value, 8))
+    end
+    textutils.pagedTabulate(print_matrix)
+    sleep(1)
+
     quater_round(matrix_state, 4, 5, 10, 15)
+    local print_matrix = {}
+    for i, value in ipairs(matrix_state) do
+        table.insert(print_matrix, int_to_hex(value, 8))
+    end
+    textutils.pagedTabulate(print_matrix)
+    sleep(1)
 end
 
 local function serialize_matrix(matrix_state)
