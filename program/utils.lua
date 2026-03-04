@@ -16,7 +16,8 @@ end
 ---@return number
 function utils.add32(...)
     local sum = 0
-    for _, number in ipairs(arg) do
+    local args = {...}
+    for _, number in ipairs(args) do
         sum = sum + number
     end
 
