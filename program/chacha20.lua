@@ -24,6 +24,19 @@ local function bytes_to_int(str, endian, signed)
     return n
 end
 
+---Split a string into "size" sized chunks
+---@param str string
+---@param size integer
+---@return table
+local function chunk_string(str, size)
+    local chunks = {}
+    for i = 1, #str, size do
+        table.insert(chunks, string.sub(str, i, i+size-1))
+    end
+
+    return chunks
+end
+
 ---Convert an integer into a hex string padded by "pad" using 0s
 ---@param num number
 ---@param pad integer
