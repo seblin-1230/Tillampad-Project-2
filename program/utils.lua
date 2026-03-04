@@ -18,10 +18,10 @@ function utils.add32(...)
     local sum = 0
     local args = {...}
     for _, number in ipairs(args) do
-        sum = sum + number
+        sum = bit32.band((sum + number), 0xffffffff)
     end
 
-    return sum % 2^32
+    return sum
 end
 
 return utils
