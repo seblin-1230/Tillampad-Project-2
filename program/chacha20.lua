@@ -85,6 +85,19 @@ local function quater_round(matrix_state, a_i, b_i, c_i, d_i)
     matrix_state[a_i], matrix_state[b_i], matrix_state[c_i], matrix_state[d_i] = a, b, c, d
 end
 
+---Does both a collumn round and a diagonal round on the matrix state
+---@param matrix_state integer[]
+local function double_round(matrix_state)
+    quater_round(matrix_state, 1, 5, 9, 13) -- Column rounds
+    quater_round(matrix_state, 2, 6, 10, 14)
+    quater_round(matrix_state, 3, 7, 11, 15)
+    quater_round(matrix_state, 4, 8, 12, 16)
+    quater_round(matrix_state, 1, 6, 11, 16) -- Diagonal rounds
+    quater_round(matrix_state, 2, 7, 12, 13)
+    quater_round(matrix_state, 3, 8, 9, 14)
+    quater_round(matrix_state, 4, 5, 10, 15)
+end
+
 ---Encrypts text using ChaCha20
 ---@param plaintext string The text to encrypt
 ---@param key string A 32 character long string
