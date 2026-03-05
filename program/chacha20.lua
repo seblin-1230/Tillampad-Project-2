@@ -1,5 +1,17 @@
 local utils = require("utils")
 
+---Reutrns a nonce, for this a 12 byte long string, bytes 1-4 is the last 4 digits of the time, bytes 5-6 is the computer id, and bytes 7-12 are random
+local function generate_nonce()
+    local time = math.floor(os.epoch("utc")/1000)
+    local id = os.getComputerID()
+    
+    local time_bytes = string.char(bit32.extract(time, 0, 8), bit32.extract(time, 8, 8), bit32.extract(time, 16, 8), bit32.extract(time, 24, 8))
+    local id_bytes = string.char(bit32.extract(os.computerID(), 0, 8), bit32.extract(os.computerID(), 8, 8))
+    local random_bytes = string.char(math.random(0xff), math.random(0xff), math.random(0xff), math.random(0xff), math.random(0xff), math.random(0xff))
+
+    return time_bytes .. id_bytes .. random_bytes
+end
+
 ---Generate the matrix state
 ---@param key string A 32 character long string
 ---@param block_count number The current block count
@@ -92,7 +104,7 @@ local function generate_keystream(key, nonce, length)
         local block = generate_keystream_block(key, nonce, block_count)
 
         for _, word in ipairs(block) do
-            local bytes = utils.int_to_bytes(word, "little", false)
+            local bytes = utils.bytes_from_int32(word)
             for _, byte in ipairs(bytes) do
                 table.insert(keystream, byte)
             end
@@ -105,11 +117,11 @@ end
 ---Encrypts text using ChaCha20
 ---@param plaintext string The text to encrypt
 ---@param key string A 32 character long string
----@param nonce string A random string 12 bytes long, if unspecified automaticaly generated.
+---@param nonce? string A random string 12 bytes long, if unspecified automaticaly generated.
 ---@return string ciphertext The encrypted text
 ---@return string nonce The nonce used to encrypt the text
 local function encrypt(plaintext, key, nonce)
-    -- if nonce == nil then nonce = generate_nonce() end
+    if nonce == nil then nonce = generate_nonce() end
 
     local keystream = generate_keystream(key, nonce, #plaintext)
 
