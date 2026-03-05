@@ -24,11 +24,11 @@ local function bytes_to_int(str, endian, signed)
     return n
 end
 
----Convert an integer to a string using the nubmers as bytes, taken from same source as bytes-to_int
+---Convert an integer to a string using the numbers as bytes, taken from same source as bytes_to_int
 ---@param num integer
 ---@param endian "big"|"little"
 ---@param signed boolean
----@return string
+---@return table
 local function int_to_bytes(num, endian, signed)
     if num < 0 and not signed then
         num = -num
@@ -52,7 +52,7 @@ local function int_to_bytes(num, endian, signed)
         end
         res = t
     end
-    return string.char(table.unpack(res))
+    return res
 end
 
 
@@ -117,145 +117,86 @@ end
 local function quater_round(matrix_state, a_i, b_i, c_i, d_i)
     local a, b, c, d = matrix_state[a_i], matrix_state[b_i], matrix_state[c_i], matrix_state[d_i]
 
-    print(string.format("a1: %08x b1: %08x c1: %08x d1: %08x", a, b, c, d))
-
     a = utils.add32(a, b)
     d = bit32.bxor(d, a)
     d = bit32.lrotate(d, 16)
-    print(string.format("a2: %08x b2: %08x c2: %08x d2: %08x", a, b, c, d))
-
 
     c = utils.add32(c, d)
     b = bit32.bxor(b, c)
     b = bit32.lrotate(b, 12)
-    print(string.format("a3: %08x b3: %08x c3: %08x d3: %08x", a, b, c, d))
 
     a = utils.add32(a, b)
     d = bit32.bxor(d, a)
     d = bit32.lrotate(d, 8)
-    print(string.format("a4: %08x b4: %08x c4: %08x d4: %08x", a, b, c, d))
 
     c = utils.add32(c, d)
     b = bit32.bxor(b, c)
     b = bit32.lrotate(b, 7)
 
     matrix_state[a_i], matrix_state[b_i], matrix_state[c_i], matrix_state[d_i] = a, b, c, d
-    print(string.format("a5: %s b5: %s c5: %s d5: %s", int_to_hex(a, 8), int_to_hex(b, 8), int_to_hex(c, 8), int_to_hex(d, 8)))
 end
 
 ---Does both a collumn round and a diagonal round on the matrix state
 ---@param matrix_state integer[]
 local function double_round(matrix_state)
     quater_round(matrix_state, 1, 5, 9, 13) -- Column rounds
-    local print_matrix = {}
-    for i, value in ipairs(matrix_state) do
-        table.insert(print_matrix, int_to_hex(value, 8))
-    end
-    textutils.pagedTabulate(print_matrix)
-    sleep(1)
-
     quater_round(matrix_state, 2, 6, 10, 14)
-    local print_matrix = {}
-    for i, value in ipairs(matrix_state) do
-        table.insert(print_matrix, int_to_hex(value, 8))
-    end
-    textutils.pagedTabulate(print_matrix)
-    sleep(1)
-    
     quater_round(matrix_state, 3, 7, 11, 15)
-    local print_matrix = {}
-    for i, value in ipairs(matrix_state) do
-        table.insert(print_matrix, int_to_hex(value, 8))
-    end
-    textutils.pagedTabulate(print_matrix)
-    sleep(1)
-
     quater_round(matrix_state, 4, 8, 12, 16)
-    local print_matrix = {}
-    for i, value in ipairs(matrix_state) do
-        table.insert(print_matrix, int_to_hex(value, 8))
-    end
-    textutils.pagedTabulate(print_matrix)
-    sleep(1)
-
     quater_round(matrix_state, 1, 6, 11, 16) -- Diagonal rounds
-    local print_matrix = {}
-    for i, value in ipairs(matrix_state) do
-        table.insert(print_matrix, int_to_hex(value, 8))
-    end
-    textutils.pagedTabulate(print_matrix)
-    sleep(1)
-
     quater_round(matrix_state, 2, 7, 12, 13)
-    local print_matrix = {}
-    for i, value in ipairs(matrix_state) do
-        table.insert(print_matrix, int_to_hex(value, 8))
-    end
-    textutils.pagedTabulate(print_matrix)
-    sleep(1)
-
     quater_round(matrix_state, 3, 8, 9, 14)
-    local print_matrix = {}
-    for i, value in ipairs(matrix_state) do
-        table.insert(print_matrix, int_to_hex(value, 8))
-    end
-    textutils.pagedTabulate(print_matrix)
-    sleep(1)
-
     quater_round(matrix_state, 4, 5, 10, 15)
-    local print_matrix = {}
-    for i, value in ipairs(matrix_state) do
-        table.insert(print_matrix, int_to_hex(value, 8))
-    end
-    textutils.pagedTabulate(print_matrix)
-    sleep(1)
 end
 
-local function serialize_matrix(matrix_state)
+
+local function serialize_keystream_block(matrix_state)
     local keystream_block = {}
-    for _, value in ipairs(matrix_state) do
-
+    for _, word in ipairs(matrix_state) do
+        local bytes = int_to_bytes(word, "little", false)
+        table.insert(keystream_block, bytes)
     end
+
+    return keystream_block
 end
 
----Encrypt a 512 bit chunk of the plaintext
----@param plaintext_chunk string
----@param key string
----@param block_count integer
----@param nonce [integer, integer, integer]
-local function encrypt_chunk(plaintext_chunk, key, block_count, nonce)
+local function generate_keystream_block(key, nonce, block_count)
     local matrix_state = initilize_matrix(key, block_count, nonce)
     local initial_matrix_state = utils.copy_table(matrix_state)
 
+    for i = 1, 10 do
+        double_round(matrix_state)
+    end
+
+    for i = 1, #matrix_state do
+        matrix_state[i] = utils.add32(matrix_state[i], initial_matrix_state[i])
+    end
     local print_matrix = {}
     for i, value in ipairs(matrix_state) do
         table.insert(print_matrix, int_to_hex(value, 8))
     end
     textutils.pagedTabulate(print_matrix)
 
-    for i = 1, 10 do
-        double_round(matrix_state)
-        local print_matrix = {}
-        for i, value in ipairs(matrix_state) do
-            table.insert(print_matrix, int_to_hex(value, 8))
+
+    return serialize_keystream_block(matrix_state)
+end
+
+---Generates a keystream long enough to encrypt a message of length `length`
+---@param key string The key to encrypt with
+---@param nonce [number, number, number] The random nonce sent as an array of three numbers
+---@param length integer THe minimum length of the keystream
+---@return integer[] keystream The resulting keystream
+local function generate_keystream(key, nonce, length)
+    local keystream = {}
+    for block_count = 1, math.ceil(length / 512) do
+        local block = generate_keystream_block(key, nonce, block_count)
+
+        for i, byte in ipairs(block) do
+            table.insert(keystream, byte)
         end
-        textutils.pagedTabulate(print_matrix)
-
-        sleep(2)
     end
 
-    for i = 1, #initial_matrix_state do
-        matrix_state[i] = utils.add32(matrix_state[i], initial_matrix_state[i])
-    end
-
-    local ciphertext_chunk = ""
-    for i, sub_chunk in ipairs(chunk_string(plaintext_chunk, 32)) do
-        local plaintext_int = bytes_to_int(sub_chunk, "big", false)
-        local ciphertext_int = bit32.bxor(plaintext_int, matrix_state[i])
-        ciphertext_chunk = ciphertext_chunk .. int_to_bytes(ciphertext_int, "little", false)
-    end
-
-    return ciphertext_chunk
+    return keystream
 end
 
 ---Encrypts text using ChaCha20
@@ -267,20 +208,18 @@ end
 local function encrypt(plaintext, key, nonce)
     if nonce == nil then nonce = generate_nonce() end
 
-    local ciphertext = ""
-    local block_count = 1
-    for i = 1, #plaintext, 64 do
-        print(string.sub(plaintext, i, i + 63))
-        ciphertext = ciphertext .. encrypt_chunk(string.sub(plaintext, i, i + 511), key, block_count, nonce)
+    local keystream = generate_keystream(key, nonce, #plaintext)
 
-        block_count = block_count + 1
-    end
+    -- textutils.tabulate(keystream)
+
+    local ciphertext = "test"
 
     return ciphertext, nonce
 end
 
 local key = string.char(0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
-    0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f)
+    0x10, 0x11, 0x12, 0x13,
+    0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f)
 local text =
 [[Gary didn't understand why Doug went upstairs to get one dollar]]
 
