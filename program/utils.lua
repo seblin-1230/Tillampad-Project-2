@@ -48,10 +48,8 @@ function utils.bytes_to_int(str, endian, signed)
     return n
 end
 
----Convert an integer to a list of bytes, reverses bytes_to_int, adapted to (https://stackoverflow.com/questions/5241799/lua-dealing-with-non-ascii-byte-streams-byteorder-change)
+---Convert a 32 bit integer to a list of integers 0-255 (bytes)
 ---@param num integer
----@param endian "big"|"little"
----@param signed boolean
 ---@return table
 function utils.int_to_bytes(num, endian, signed)
     if num < 0 and not signed then
@@ -86,12 +84,6 @@ end
 function utils.int_to_hex(num, pad)
     local format = string.format("%%0%dx", pad)
     return string.format(format, num)
-end
-
----Reutrns a nonce, current implemention temporary until i implement better randomness TODO UPDATE TO USE NEW NONCE SYSTEM
----@return [number,number,number] nonce An array containing three 32 bit random numbers
-function utils.generate_nonce()
-    return { math.random(0, 0xFFFFFFFF), math.random(0, 0xFFFFFFFF), math.random(0, 0xFFFFFFFF) }
 end
 
 return utils
