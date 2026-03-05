@@ -1,12 +1,13 @@
 local utils = require("utils")
 
 ---Reutrns a nonce, for this a 12 byte long string, bytes 1-4 is the last 4 digits of the time, bytes 5-6 is the computer id, and bytes 7-12 are random
+---@return string nonce The generated nonce
 local function generate_nonce()
     local time = math.floor(os.epoch("utc")/1000)
     local id = os.getComputerID()
     
     local time_bytes = string.char(bit32.extract(time, 0, 8), bit32.extract(time, 8, 8), bit32.extract(time, 16, 8), bit32.extract(time, 24, 8))
-    local id_bytes = string.char(bit32.extract(os.computerID(), 0, 8), bit32.extract(os.computerID(), 8, 8))
+    local id_bytes = string.char(bit32.extract(id, 0, 8), bit32.extract(id, 8, 8))
     local random_bytes = string.char(math.random(0xff), math.random(0xff), math.random(0xff), math.random(0xff), math.random(0xff), math.random(0xff))
 
     return time_bytes .. id_bytes .. random_bytes
