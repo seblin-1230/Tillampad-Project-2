@@ -64,4 +64,12 @@ function utils.int_to_hex(num, pad)
     return string.format(format, num)
 end
 
+function utils.print_table_as_hex(raw_table, pad)
+    local print_table = {}
+    for _, value in ipairs(raw_table) do
+        table.insert(print_table, utils.int_to_hex(value, pad))
+    end
+    textutils.pagedTabulate(print_table)
+end
+
 return utils
