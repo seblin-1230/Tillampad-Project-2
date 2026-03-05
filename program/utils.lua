@@ -51,30 +51,8 @@ end
 ---Convert a 32 bit integer to a list of integers 0-255 (bytes)
 ---@param num integer
 ---@return table
-function utils.int_to_bytes(num, endian, signed)
-    if num < 0 and not signed then
-        num = -num
-        print "warning, dropping sign from number converting to unsigned"
-    end
-    local res = {}
-    local n = math.ceil(select(2, math.frexp(num)) / 8) -- number of bytes to be used.
-    if signed and num < 0 then
-        num = num + 2 ^ n
-    end
-    for k = n, 1, -1 do -- 256 = 2^8 bits per char.
-        local mul = 2 ^ (8 * (k - 1))
-        res[k] = math.floor(num / mul)
-        num = num - res[k] * mul
-    end
-    assert(num == 0)
-    if endian == "big" then
-        local t = {}
-        for k = 1, n do
-            t[k] = res[n - k + 1]
-        end
-        res = t
-    end
-    return res
+function utils.bytes_from_int32(num)
+    return {bit32.extract(num, 0, 8), bit32.extract(num, 8, 8), bit32.extract(num, 16, 8), bit32.extract(num, 24, 8)}
 end
 
 ---Convert an integer into a hex string padded by "pad" using 0s
