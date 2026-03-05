@@ -82,7 +82,7 @@ local function split_()
 
 end
 
----Reutrns a nonce, current implemention temporary until i implement better randomness
+---Reutrns a nonce, current implemention temporary until i implement better randomness TODO UPDATE TO USE NEW NONCE SYSTEM
 ---@return [number,number,number] nonce An array containing three 32 bit random numbers
 local function generate_nonce()
     return { math.random(0, 0xFFFFFFFF), math.random(0, 0xFFFFFFFF), math.random(0, 0xFFFFFFFF) }
@@ -91,7 +91,7 @@ end
 ---Generate the matrix state
 ---@param key string A 32 character long string
 ---@param block_count number The current block count
----@param nonce [number, number, number] Three random 32 bit numbers
+---@param nonce string A 12 byte long string
 local function initilize_matrix(key, block_count, nonce)
     local matrix = { 0x61707865, 0x3320646e, 0x79622d32, 0x6b206574 }
 
@@ -101,8 +101,8 @@ local function initilize_matrix(key, block_count, nonce)
 
     table.insert(matrix, block_count)
 
-    for _, sub_nonce in ipairs(nonce) do
-        table.insert(matrix, sub_nonce)
+    for i = 1, #nonce, 4 do
+        table.insert(matrix, bytes_to_int(string.sub(nonce, i, i+3), "big", false))
     end
 
     return matrix
@@ -177,13 +177,18 @@ local function generate_keystream_block(key, nonce, block_count)
     end
     textutils.pagedTabulate(print_matrix)
 
+    local print_matrix = {}
+    for i, value in ipairs(serialize_keystream_block(matrix_state)) do
+        table.insert(print_matrix, int_to_hex(value, 8))
+    end
+    textutils.pagedTabulate(print_matrix)
 
     return serialize_keystream_block(matrix_state)
 end
 
 ---Generates a keystream long enough to encrypt a message of length `length`
 ---@param key string The key to encrypt with
----@param nonce [number, number, number] The random nonce sent as an array of three numbers
+---@param nonce string The random nonce sent as a string 12 bytes long
 ---@param length integer THe minimum length of the keystream
 ---@return integer[] keystream The resulting keystream
 local function generate_keystream(key, nonce, length)
@@ -202,11 +207,11 @@ end
 ---Encrypts text using ChaCha20
 ---@param plaintext string The text to encrypt
 ---@param key string A 32 character long string
----@param nonce? [number, number, number] Three random 32 bit numbers, if unspecified automaticaly generated.
+---@param nonce string A random string 12 bytes long, if unspecified automaticaly generated.
 ---@return string ciphertext The encrypted text
----@return [number, number, number] nonce The nonce used to encrypt the text
+---@return string nonce The nonce used to encrypt the text
 local function encrypt(plaintext, key, nonce)
-    if nonce == nil then nonce = generate_nonce() end
+    -- if nonce == nil then nonce = generate_nonce() end
 
     local keystream = generate_keystream(key, nonce, #plaintext)
 
@@ -221,9 +226,11 @@ local key = string.char(0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x
     0x10, 0x11, 0x12, 0x13,
     0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f)
 local text =
-[[Gary didn't understand why Doug went upstairs to get one dollar]]
+[[
+Ladies and Gentlemen of the class of '99: If I could offer you only one tip forthe future, sunscreen would be it.
+]]
 
-local ciphertext, nonce = encrypt(text, key, { 0, 0, 0 })
+local ciphertext, nonce = encrypt(text, key, "\x00\x00\x00\x00\x4a\x00\x00\x00\x00\x00\x00\x00")
 textutils.pagedPrint(ciphertext)
 
 
