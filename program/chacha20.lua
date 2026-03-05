@@ -61,6 +61,11 @@ local function double_round(matrix_state)
     quater_round(matrix_state, 4, 5, 10, 15)
 end
 
+---Genereates a 64 byte chunk of the key stream (Doesn't serialise the matrix)
+---@param key string
+---@param nonce string
+---@param block_count integer
+---@return integer[]
 local function generate_keystream_block(key, nonce, block_count)
     local matrix_state = initilize_matrix(key, block_count, nonce)
     local initial_matrix_state = utils.copy_table(matrix_state)
@@ -77,10 +82,10 @@ local function generate_keystream_block(key, nonce, block_count)
 end
 
 ---Generates a keystream long enough to encrypt a message of length `length`
----@param key string The key to encrypt with
----@param nonce string The random nonce sent as a string 12 bytes long
----@param length integer THe minimum length of the keystream
----@return integer[] keystream The resulting keystream
+---@param key string
+---@param nonce string
+---@param length integer
+---@return integer[] keystream
 local function generate_keystream(key, nonce, length)
     local keystream = {}
     for block_count = 1, math.ceil(length / 64) do
@@ -114,21 +119,7 @@ local function encrypt(plaintext, key, nonce)
         table.insert(cipherbytes, bit32.bxor(keystream[i], plainbyte))
     end
 
-    return cipherbytes, nonce
+    return string.char(table.unpack(cipherbytes)), nonce
 end
 
-local key = string.char(0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
-    0x10, 0x11, 0x12, 0x13,
-    0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f)
-local text =
-[[
-Ladies and Gentlemen of the class of '99: If I could offer you only one tip forthe future, sunscreen would be it.
-]]
-
-local ciphertext, nonce = encrypt(text, key, "\x00\x00\x00\x00\x4a\x00\x00\x00\x00\x00\x00\x00")
-
-local print_matrix = {}
-for i, value in ipairs(ciphertext) do
-    table.insert(print_matrix, utils.int_to_hex(value, 1))
-end
-textutils.pagedTabulate(print_matrix)
+return {crypt = encrypt}
