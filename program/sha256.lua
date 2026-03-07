@@ -10,19 +10,32 @@ local function generate_message_block(message)
     local message_block = {}
     local message_length = 0
     for i = 1, #message do
-        table.insert(message_block, string.byte(string.sub(message, i)))
+        table.insert(message_block, string.byte(message, i))
         message_length = message_length + 8
     end
-    table.insert(message_block, 1)
+    table.insert(message_block, 0x80)
 
     local pad_by = (64 - #message_block % 64) - 8
     pad(message_block, pad_by)
 
-    utils.print_table_as_hex(message_block, 2)
+---@diagnostic disable-next-line: deprecated
+    local len_bits = string.pack(">I8", message_length)
+    for i = 1, 8 do
+        table.insert(message_block, string.byte(len_bits, i))
+    end
+
+    return message_block
 end
 
 local function hash(message)
     local message_block = generate_message_block(message)
+    
+    for i = 1, #message_block, 64 do
+        local chunk = {table.unpack(message_block, i, i+63)}
+
+        
+    end
+
 end
 
 return {hash = hash}

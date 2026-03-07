@@ -16,8 +16,3 @@ local utils = require("utils")
 local message = "The quick brown fox jumps over the lazy dog and then decides to jump over the lazy dog again just for the fun."
 
 print(sha256.hash(message))
-utils.print_table_as_hex({string.byte("Hello", 1, 5)}, 2)
-
----@diagnostic disable-next-line: deprecated
-local packed = string.pack("<I8", 1)
-utils.print_table_as_hex({string.byte(packed, 1, #packed)}, 2)
