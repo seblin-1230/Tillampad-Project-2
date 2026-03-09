@@ -110,8 +110,13 @@ local function hash(message)
         hash_values = chunk_loop(chunk, hash_values)
     end
 
-    utils.print_table_as_hex(hash_values, 4)
-    -- return utils.bytes_from_int32(hash_values[1])
+    local hash_parts = {}
+
+    for i = 1, 8 do
+        hash_parts[i] = string.format("%08x", hash_values[i])
+    end
+
+    return table.concat(hash_parts)
 end
 
 return {hash = hash}
