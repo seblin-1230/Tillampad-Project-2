@@ -53,7 +53,14 @@ local function message_schedule(chunk)
 end
 
 local function chunk_loop(chunk, hash_values)
-    local message_schedule = message_schedule(chunk)
+    local words = message_schedule(chunk)
+
+    for i = 16, 64 do
+        local o0 = bit32.bxor(bit32.rrotate(words[i-14], 7), bit32.rrotate(words[i-14], 18), bit32.rrotate(words[i-14], 3))
+        local o1 = bit32.bxor(bit32.rrotate(words[i-2], 17), bit32.rrotate(words[i-2], 19), bit32.rrotate(words[i-2], 10))
+
+        words[i] = utils.add32(words[i-15], o0, words[i-7], o1)
+    end
 
     return 
 end
