@@ -90,3 +90,13 @@ Calculated with: hash(all_files_hashed + all_periferals_hashed)
 | time        | integer | The time the request was sent |
 | type        | string  | The type of payload           |
 | session_key | integer | The session key               |
+
+### New neighbor
+	Sent from a new station to stations it is neighboring
+
+| Key     | Type    | Explanation                   |
+| ------- | ------- | ----------------------------- |
+| time    | integer | The time the request was sent |
+| type    | string  | The type of payload           |
+| station | integer | The new station               |
+
