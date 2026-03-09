@@ -41,7 +41,7 @@ end
 local function message_schedule(chunk)
     local schedule = {}
     for i = 1, #chunk, 4 do
-        local word = bit32.bor(bit32.lshift(chunk[i], 24), bit32.lshift(chunk[i+1], 16), bit32.lshift(chunk[i+2], 6), chunk[i+3])
+        local word = bit32.bor(bit32.lshift(chunk[i], 24), bit32.lshift(chunk[i+1], 16), bit32.lshift(chunk[i+2], 8), chunk[i+3])
         table.insert(schedule, word)
     end 
 
