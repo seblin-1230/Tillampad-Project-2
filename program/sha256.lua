@@ -46,10 +46,10 @@ local function message_schedule(chunk)
     end 
 
     for i = 17, 64 do
-        local o0 = bit32.bxor(bit32.rrotate(schedule[i-14], 7), bit32.rrotate(schedule[i-14], 18), bit32.rshift(schedule[i-14], 3))
+        local o0 = bit32.bxor(bit32.rrotate(schedule[i-15], 7), bit32.rrotate(schedule[i-15], 18), bit32.rshift(schedule[i-15], 3))
         local o1 = bit32.bxor(bit32.rrotate(schedule[i-2], 17), bit32.rrotate(schedule[i-2], 19), bit32.rshift(schedule[i-2], 10))
 
-        schedule[i] = utils.add32(schedule[i-15], o0, schedule[i-7], o1)
+        schedule[i] = utils.add32(schedule[i-16], o0, schedule[i-7], o1)
     end
 
     return schedule
