@@ -45,8 +45,11 @@ local function message_schedule(chunk)
         table.insert(schedule, word)
     end 
 
-    for i = 1, 48 do
-        schedule[i+16] = 0
+    for i = 17, 64 do
+        local o0 = bit32.bxor(bit32.rrotate(schedule[i-14], 7), bit32.rrotate(schedule[i-14], 18), bit32.rshift(schedule[i-14], 3))
+        local o1 = bit32.bxor(bit32.rrotate(schedule[i-2], 17), bit32.rrotate(schedule[i-2], 19), bit32.rshift(schedule[i-2], 10))
+
+        schedule[i] = utils.add32(schedule[i-15], o0, schedule[i-7], o1)
     end
 
     return schedule
@@ -55,14 +58,37 @@ end
 local function chunk_loop(chunk, hash_values)
     local words = message_schedule(chunk)
 
-    for i = 17, 64 do
-        local o0 = bit32.bxor(bit32.rrotate(words[i-14], 7), bit32.rrotate(words[i-14], 18), bit32.rshift(words[i-14], 3))
-        local o1 = bit32.bxor(bit32.rrotate(words[i-2], 17), bit32.rrotate(words[i-2], 19), bit32.rshift(words[i-2], 10))
+    local a, b, c, d, e, f, g, h = hash_values[1], hash_values[2], hash_values[3], hash_values[4], hash_values[5], hash_values[6], hash_values[7], hash_values[8]
 
-        words[i] = utils.add32(words[i-15], o0, words[i-7], o1)
+    for i = 1, 64 do
+        local majority = bit32.bxor(bit32.band(a, b), bit32.band(a, c), bit32.band(b, c))
+        local choice = bit32.bxor(bit32.band(e, f), bit32.band(bit32.bnot(e), g))
+
+        local S0 = bit32.bxor(bit32.rrotate(a, 2), bit32.rrotate(a, 13), bit32.rrotate(a, 22))
+        local S1 = bit32.bxor(bit32.rrotate(e, 6), bit32.rrotate(e, 11), bit32.rrotate(e, 25))
+
+        local temp1 = utils.add32(h, S1, choice, K[i], words[i])
+        local temp2 = utils.add32(S0, majority)
+
+        h = g
+        g = f
+        f = e
+        e = utils.add32(d, temp1)
+        d = c
+        c = b
+        b = a
+        a = utils.add32(temp1, temp2)
     end
 
-    return 
+    return table.pack( utils.add32(a, hash_values[1]),
+                              utils.add32(b, hash_values[2]),
+                              utils.add32(c, hash_values[3]),
+                              utils.add32(d, hash_values[4]),
+                              utils.add32(e, hash_values[5]),
+                              utils.add32(f, hash_values[6]),
+                              utils.add32(g, hash_values[7]),
+                              utils.add32(h, hash_values[8])
+                            )
 end
 
 local function hash(message)
@@ -78,14 +104,14 @@ local function hash(message)
         0x1f83d9ab,
         0x5be0cd19,
     }
-
     for i = 1, #message_block, 64 do
         local chunk = {table.unpack(message_block, i, i+63)}
-
+        
         hash_values = chunk_loop(chunk, hash_values)
-        if i == 1 then utils.print_table_as_hex(hash_values, 4) end
     end
 
+    utils.print_table_as_hex(hash_values, 4)
+    -- return utils.bytes_from_int32(hash_values[1])
 end
 
 return {hash = hash}
