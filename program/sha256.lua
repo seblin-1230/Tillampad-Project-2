@@ -11,12 +11,9 @@ local K = {
     0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2,
 }
 
-local function pad(message, pad)
-    for i = 1, pad do
-        table.insert(message, 0)
-    end
-end
-
+---Convert ´message´ into a sha 256 message block, each element in the table is an integer used as a byte
+---@param message string
+---@return integer[]
 local function generate_message_block(message)
     local message_block = {}
     local message_length = 0
@@ -27,7 +24,9 @@ local function generate_message_block(message)
     table.insert(message_block, 0x80)
 
     local pad_by = (64 - #message_block % 64) - 8
-    pad(message_block, pad_by)
+    for i = 1, pad_by do
+        table.insert(message_block, 0)
+    end
 
 ---@diagnostic disable-next-line: deprecated
     local len_bits = string.pack(">I8", message_length)
@@ -38,6 +37,9 @@ local function generate_message_block(message)
     return message_block
 end
 
+---Convert a 64 byte chunk into a 
+---@param chunk any
+---@return table
 local function message_schedule(chunk)
     local schedule = {}
     for i = 1, #chunk, 4 do
@@ -55,6 +57,10 @@ local function message_schedule(chunk)
     return schedule
 end
 
+--- Does the chunk loop part of sha256 on a 64 byte chunk of message block
+---@param chunk integer[] The 64 byte chunk of message block
+---@param hash_values integer[] The current hash values 
+---@return integer[]
 local function chunk_loop(chunk, hash_values)
     local words = message_schedule(chunk)
 
@@ -80,17 +86,21 @@ local function chunk_loop(chunk, hash_values)
         a = utils.add32(temp1, temp2)
     end
 
-    return table.pack( utils.add32(a, hash_values[1]),
-                              utils.add32(b, hash_values[2]),
-                              utils.add32(c, hash_values[3]),
-                              utils.add32(d, hash_values[4]),
-                              utils.add32(e, hash_values[5]),
-                              utils.add32(f, hash_values[6]),
-                              utils.add32(g, hash_values[7]),
-                              utils.add32(h, hash_values[8])
-                            )
+    return table.pack(  
+        utils.add32(a, hash_values[1]),
+        utils.add32(b, hash_values[2]),
+        utils.add32(c, hash_values[3]),
+        utils.add32(d, hash_values[4]),
+        utils.add32(e, hash_values[5]),
+        utils.add32(f, hash_values[6]),
+        utils.add32(g, hash_values[7]),
+        utils.add32(h, hash_values[8])
+    )
 end
 
+---Hashes ´message´ using sha256
+---@param message string
+---@return string
 local function hash(message)
     local message_block = generate_message_block(message)
     
