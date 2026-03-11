@@ -21,43 +21,148 @@
 ### Route list
 	The route the user is taking to teleport to their destination. Takes the form of a list containing an arbitrary number of stations and optionaly ending in a  coordinates at the end
 ### System hash
-	A hash made from all the files on a computer and all the # peripherals connected to a computer (exluding drives) recalculated on the fly and no parts of it saved to the disk
+	A hash made from all the files on a computer and all the peripherals connected to a computer (exluding drives) recalculated on the fly and no parts of it saved to the disk
 Calculated with: hash(all_files_hashed + all_periferals_hashed) 
 ### Nonce
 	A string of randomly generated characters used to verify that the hashes sent between two stations aren't saved previous versions
-### Teleport request
-	A request from one station to another to verify each others integrity
 
-| Key               | Type    | Explanation                                                  |
-| ----------------- | ------- | ------------------------------------------------------------ |
-| time              | integer | The time the request was sent                                |
-| type              | string  | The type of payload                                          |
-| route             | list    | A list of stations optionalty ending in a set of coordinates |
-| [[#Nonce\|nonce]] | string  | A random string to verify hashes                             |
-### Teleport response
-	The response to a verification request
-
-| Key          | Type    | Explanation                                         |
-| ------------ | ------- | --------------------------------------------------- |
-| time         | integer | The time the request was sent                       |
-| type         | string  | The type of payload                                 |
-| hash         | string  | The hash calculated by hashing all of the variables |
-| station_data | table   | The data of the station used to calculate the       |
-### Teleport accept
-	Sent from accepting station when verification from both stations is done and the teleport can be initiated
-
-| Key  | Type    | Explanation                   |
-| ---- | ------- | ----------------------------- |
-| time | integer | The time the request was sent |
-| type | string  | The type of payload           |
+# Rednet messages
+## Format
+	Nonce: The random bytes used to encrypt the message, and if necessary the station hash
+	Type: What the message is about
+	ID: The computer id the message was sent from
+	Payload: The data sent being sent with the message
+	
+	Everything except the nonce is encrypted
+```mermaid
+---
+title: "Message Format"
+---
+packet-beta
+0-11: "Nonce (12 Bytes)"
+12-19: "Type (8 Bytes)"
+20-21: "ID(2Bytes)"
+22-31: "Payload (...)"
+```
+### Teleport initiate
+	The message sent when a station wants to teleport a user to another station
+	Type: TeleInit
+```mermaid
+---
+title: "Payload Format"
+---
+packet-beta
+0-31: "Station hash"
+```
+### Teleport verification
+	The message sent from the station being telepoted to, used to verify the station
+	Type: TeleVeri
+```mermaid
+---
+Title: "Payload Format"
+---
+packet-beta
+0-31: "Station hash"
+```
+### Teleport denied
+	Sent when a station denies a teleport, mostly due to failing a station hash check
+	Type: TeleDeni
+```mermaid
+---
+title: "Payload Format"
+---
+packet-beta
+0-15: "Reason"
+```
+### Teleport done
+	Sent after a station teleports a user to another station
+	Type: TeleDone
+```mermaid
+---
+title: "Payload Format"
+---
+packet-beta
+0-1: "Station [1]"
+2-3: "Station [2]"
+4-5: "Station [3]"
+6-7: "..."
+8-9: "Station [n]"
+```
 ### Session key request
-	A request sent from a station when it starts up and detects that it doesn't have a session key
+	A request sent from a station after the master disk is inserted after startup
+	Type: SeKeyReq (is not encrypted)
+```mermaid
+---
+title: "Payload Format"
+---
+packet-beta
+0-31: "Master secret hash"
+```
+### Session key response
+	A response sent to a station after a station has been verified to have the master secret
+	Type: SeKeyRes (is not encrypted)
+```mermaid
+---
+title: "Payload Format"
+---
+packet-beta
+0-31: "Session key"
+```
+### Clear master
+	A message sent when all stations have been activated
+	Type: ClearMas
+```mermaid
+---
+title: "Payload Format"
+---
+packet-beta
+0-16: "No payload"
+```
+### New station
+	Sent from a new station after it has the session key
+	Type: NewStati
+```mermaid
+---
+title: "Payload Format"
+---
+packet-beta
+0-3: "X"
+4-5: "Y"
+6-9: "Z"
+10-11: "Station ID"
+12-75: "Station Description"
+```
+### New station verification
+	Sent from an existing station to start verifying a new one (Encrypted using the master secret)
+	Type: NewSVeri
+```mermaid
+---
+title: "Payload Format"
+---
+packet-beta
+0-31: "Master secret hash"
+```
+### New neighbour
+	Sent from a new station to its bordering stations
+	Type: NewNeigh
+```mermaid
+---
+title: "Payload Format"
+---
+packet-beta
+0-1: "Station ID"
+```
 
-| Key  | Type    | Explanation                   |
-| ---- | ------- | ----------------------------- |
-| time | integer | The time the request was sent |
-| type | string  | The type of payload           |
 
+
+
+
+
+
+
+
+Maybe use stuff below line
+___
 ### Key exchange begin
 	Sent from a station begining the process of sending over a session key
 
@@ -90,13 +195,4 @@ Calculated with: hash(all_files_hashed + all_periferals_hashed)
 | time        | integer | The time the request was sent |
 | type        | string  | The type of payload           |
 | session_key | integer | The session key               |
-
-### New neighbor
-	Sent from a new station to stations it is neighboring
-
-| Key     | Type    | Explanation                   |
-| ------- | ------- | ----------------------------- |
-| time    | integer | The time the request was sent |
-| type    | string  | The type of payload           |
-| station | integer | The new station               |
 

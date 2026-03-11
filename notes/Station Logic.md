@@ -88,31 +88,35 @@ When I started looking i found Dijkstra’s algorithm witch seemed like a perfec
 11. Return $route$ 
 ---
 ## Teleport logic
-1. User is at Station A and selects a destination
-2. Station A sets route = Routing_Logic(destination) (in this case B -> C -> destination)
-3. Station A saves it's destination as Station B
-4. Station A removes Station B from route
-5. Station A generates a random [[Terms#Nonce|nonce]]
-6. Station A sends a [[Terms#Teleport request|teleport request]] using nonce and route to Station B
-7. Station B saves the route from the request
-8. Station B calculates $H_1$ = hash([[Terms#System hash|system_hash]] + computerID() + route + [[Terms#Secret key|secret_key]] + [[Terms#Nonce|nonce]]])
-9. Station B sends a [[Terms#Teleport response|teleport response]] containing $H_1$ to Station A
-10. Station A calculates $H_2$ = hash([[Terms#System hash|system_hash]] + station_b_computerID + route + [[Terms#Secret key|secret_key]] + [[Terms#Nonce|nonce]]])
-11. Station A checks that $H_1 = H_2$ 
-12. Station A calculates $H_3$ = hash([[Terms#System hash|system_hash]] + computerID() + route + [[Terms#Secret key|secret_key]] + [[Terms#Nonce|nonce]])
-13. Station A sends a [[Terms#Teleport response|teleport response]] containing $H_3$ to Station B
-14. Station B calculates $H_4$ = hash([[Terms#System hash|system_hash]] + station_a_computerID() + route + [[Terms#Secret key|secret_key]] + [[Terms#Nonce|nonce]])
-15. Station B checks that $H_3 = H_4$ 
-16. Station B sends a [[Terms#Teleport accept|teleport accept]] to Station A
-17. Station A waits for user to get in teleport chamber
-18. Station A teleports user to Station B
-19. Station B waits for user to arrive in teleport chamber
-20. Station B checks if the next destination is the final one (it is not)
-21. Repeat steps 2 - 17 with Station B replacing Station A and Station C replacing Station B
-22. Station C checks if the next destination is the final one (is is)
-23. Station C checks if the final destination is a station (it isn't)
-24. If it was it does the verification handshake with the station
-25. Teleport user to destination
+1. User is at Station A and selects a $destination$
+2. Station A sets $route = routing\_logic(destination)$ (in this case A -> B -> C -> destination)
+3. Station A removes Station A from $route$
+4. Station A checks if $route$ is empty
+5. If it is
+	1. Open door out of teleportation chamber
+	2. Stop teleportation logic
+6. If it isn't
+	1. Station A checks if the next station is a set of coordinates
+	2. If it is
+		1. Teleport user to those coordinates
+		2. Stop teleportation logic
+	3. If it isn't
+		1. Station A saves it's destination as Station B ($route[1]$)
+		2. Station A generates a $nonce$
+		3. Station A calculates $station\_hash_{A\_A}=hash(files+peripherals+nonce+id_A)$
+		4. Station A sends a [[Terms#Teleport initiate|teleport initiate]] to Station B
+		5. Station B calculates $station\_hash_{A\_B}=hash(files+peripherals+nonce+id_A)$
+		6. Station B checks that $station\_hash_{A\_B}=station\_hash_{A\_A}$
+		7. If it dosn't pass Station B sends a [[Terms#Teleport denied|teleport denied]] and abandons this teleport
+		8. Station B calculates $station\_hash_{B\_B}=hash(files+peripherals+nonce+id_B)$
+		9. Station B sends a [[Terms#Teleport verification|teleport verification]]
+		10. Station A calculates $station\_hash_{B\_A}=hash(files+peripherals+nonce+id_B)$
+		11. Station A checks that $staiton\_hash_{B\_A}=station\_hash_{B\_B}$
+		12. If it doesn't pass Station A sends a [[Terms#Teleport denied|teleport denied]] and abandons this teleport
+		13. Station A teleports user to Station B
+		14. Station A sends [[Terms#Teleport done|teleport done]] to Station B
+		15. Station B saves $route$
+7. Repeat steps 3-6 until "Stop teleportation logic" replacing Station A with the station the user is currently at
 ---
 ## Network restart logic
 	Station A is the station used by an admin to initilize the network
@@ -164,14 +168,15 @@ I hav ecome to the conclusion that this is an unsolvable problem. The only way t
 13. Station A teleports admin to Station B
 14. Repeat steps 3-10 at Station B
 15. The admin inputs Station A
-16. Station B sends a request for the $session\_key$ to Station A, encrypted with $hash(master\_secret)$ as the key
-17. Station A respondes with the $session\_key$, also encrypted with $hash(master\_secret)$ as the key
-18. Station B saves $session\_key$ in RAM
-19. Station B sends the admin to Station C
-20. This process repeats until every station has been verified
-21. The admin is at Station Z
-22. Station Z sends a request to all stations to clear $master\_secret$ out of RAM this is encrypted using the new $session\_key$
-23. All stations clear $master\_secret$ out of RAM
+16. Station B sends a [[Terms#Session key request|session key request]] to Station A, encrypted using $master\_secret$
+17. Station A checks that the decrypted key request is the $master\_secret\_hash$
+18. Station A respondes with the $session\_key$, also encrypted with $master\_secret$ as the key
+19. Station B saves $session\_key$ in RAM
+20. Station B sends the admin to Station C
+21. This process repeats until every station has been verified
+22. The admin is at Station Z
+23. Station Z sends a request to all stations to clear $master\_secret$ out of RAM this is encrypted using the new $session\_key$
+24. All stations clear $master\_secret$ out of RAM
 ---
 ## Adding station logic
 	Station A is new, Station B is existing
@@ -179,25 +184,23 @@ I hav ecome to the conclusion that this is an unsolvable problem. The only way t
 2. An admin insert the $master\_disk$ into Station A
 3. An admin runs the create station script on Station A from the $master\_disk$
 4. Station A copies all the station scripts and the list of stations from the $master\_disk$
-5. Station A initiates the diffe-helleman key exchange with a random station from the list 
-	1. Station A sends a [[Terms#Key exchange begin|key exchange begin]] to Station B
-	2. Station B saves p and g
-	3. Station B sends a [[Terms#Key exchange recived|key exchange recived]] to Station A
-	4. Station A generates $private_A$ = random_bits(256)
-	5. Station B generates $private_B$ = random_bits(256)
-	6. Station A computes $public_A=g^{private_A}\mod p$ 
-	7. Station B computes $public_B=g^{private_B}\mod p$
-	8. Station A and B both send a [[Terms#Key exchange intermidiate|key exchange intermidiate]] with their public keys
-	9. Station A and B wait to recive the public keys
-	10. Station A computes $K_{temp} = {public_B}^{private_A}\mod p$
-	11. Station B computes $K_{temp}={public_A}^{private_B}\mod p$
-6. Station A sends the master secret to Staiton B, encrypted with $K_{temp}$
-7. Station B checks that $hash(sent\_master\_secret)=master\_hash$
-8. If it does Station B sends the $session\_key$ to Station A, encrypted using $K_{temp}$
-9. Station A saves $session\_key$ and waits for the master disk to be removed
-10. An admin inputs what stations Station A is neighboring
-11. Station A sends a [[Terms#New neighbor|new neighbor]] to each of its neighbors
-12. Once it is removed Station A goes into normal operation
+5. Station A teleports admin to a random station and start waiting for [[Terms#New station verification|new station verification]]
+6. An admin inserts $master\_disk$ into Station B
+7. Station B verifys $master\_disk$ and saves $master\_secret$
+8. An admin inputs Station A into Station B
+9. Station B sends [[Terms#New station verification|new station verification]] to Station A
+10. Station A checks that decrypted payload is $master\_secret\_hash$
+11. Station A sends 
+
+
+
+12. If it does Station B sends the $session\_key$ to Station A, encrypted using $K_{temp}$
+13. Station A saves $session\_key$ and waits for the master disk to be removed
+14. An admin inputs what stations Station A is neighboring
+15. Station A broadcasts [[Terms#New station|new station]] to every station
+16. Station A sends [[Terms#New neighbour|new neighbour]] to each of its neighbors
+17. Station A adds itself to the $master\_disk$ station list
+18. Station A goes into normal operation
 
 ---
 ## ChaCha20 Encryption
