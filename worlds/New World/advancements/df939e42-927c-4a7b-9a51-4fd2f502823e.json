@@ -743,5 +743,53 @@
     },
     "done": true
   },
+  "plethora:recipes/misc/module_sensor": {
+    "criteria": {
+      "has_manipulator_mark_2": "2026-02-26 12:54:43 +0100"
+    },
+    "done": true
+  },
+  "plethora:recipes/misc/module_kinetic": {
+    "criteria": {
+      "has_manipulator_mark_2": "2026-02-26 12:54:43 +0100"
+    },
+    "done": true
+  },
+  "plethora:recipes/misc/module_keyboard": {
+    "criteria": {
+      "has_manipulator_mark_2": "2026-02-26 12:54:43 +0100"
+    },
+    "done": true
+  },
+  "plethora:recipes/misc/module_laser": {
+    "criteria": {
+      "has_manipulator_mark_2": "2026-02-26 12:54:43 +0100"
+    },
+    "done": true
+  },
+  "plethora:recipes/misc/module_introspection": {
+    "criteria": {
+      "has_manipulator_mark_2": "2026-02-26 12:54:43 +0100"
+    },
+    "done": true
+  },
+  "plethora:recipes/misc/module_scanner": {
+    "criteria": {
+      "has_manipulator_mark_2": "2026-02-26 12:54:43 +0100"
+    },
+    "done": true
+  },
+  "plethora:recipes/misc/module_glasses": {
+    "criteria": {
+      "has_manipulator_mark_2": "2026-02-26 12:54:43 +0100"
+    },
+    "done": true
+  },
+  "plethora:recipes/misc/scanner_module_upgrade": {
+    "criteria": {
+      "has_scanner": "2026-02-26 12:55:49 +0100"
+    },
+    "done": true
+  },
   "DataVersion": 3465
 }

@@ -13,6 +13,11 @@ local utils = require("utils")
 -- local unencrypted = chacha20.crypt(encrypted, key, nonce)
 -- print(unencrypted)
 
-local message = "The quick brown fox jumps over the lazy dog and then decides to jump over the lazy dog again just for the fun."
+-- local message = "The quick brown fox jumps over the lazy dog and then decides to jump over the lazy dog again just for the fun."
 
-print(sha256.hash(message))
+-- print(sha256.hash(message))
+
+local file = fs.open("identify.txt", "r")
+print(sha256.hash(file.read()))
+
+file.close()
