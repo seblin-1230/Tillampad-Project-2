@@ -17,7 +17,9 @@ local utils = require("utils")
 
 -- print(sha256.hash(message))
 
-local file = fs.open("identify.txt", "r")
-print(sha256.hash(file.read()))
+local file_o = fs.open("tmp.txt", "w")
+local file_i = fs.open("program/identity.txt", "r")
+file_o.write(sha256.hash(file_i.read()))
 
-file.close()
+file_o.close()
+file_i.close()
