@@ -15,4 +15,6 @@ local utils = require("utils")
 
 local message = "The quick brown fox jumps over the lazy dog and then decides to jump over the lazy dog again just for the fun."
 
+local file = assert(fs.open("out.txt", "w"))
 print(sha256.hash(message))
+file.write(sha256.hash(message))
