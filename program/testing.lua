@@ -15,11 +15,6 @@ local utils = require("utils")
 
 -- local message = "The quick brown fox jumps over the lazy dog and then decides to jump over the lazy dog again just for the fun."
 
--- print(sha256.hash(message))
-
-local file_o = fs.open("tmp.txt", "w")
-local file_i = fs.open("program/identity.txt", "r")
-file_o.write(sha256.hash(file_i.read()))
-
-file_o.close()
-file_i.close()
+local file = assert(fs.open("out.txt", "w"))
+print(sha256.hash(message))
+file.write(sha256.hash(message))
