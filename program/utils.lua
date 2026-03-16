@@ -72,4 +72,17 @@ function utils.print_table_as_hex(raw_table, pad)
     textutils.pagedTabulate(print_table)
 end
 
+---The same as os.pullEvent exept it doesn't stop on terminate events
+---@param event? string The event filter
+---@return string event The event name of the returned event
+---@return ...
+function utils.pullEventOverride(event)
+    repeat
+---@diagnostic disable-next-line: lowercase-global
+        event_new, data = os.pullEventRaw(event)
+    until event_new ~= "terminate"
+
+    return event_new, data
+end
+
 return utils
