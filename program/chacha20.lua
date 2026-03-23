@@ -1,18 +1,5 @@
 local utils = require("utils")
 
----Reutrns a nonce, for this a 12 byte long string, bytes 1-4 is the last 4 digits of the time, bytes 5-6 is the computer id, and bytes 7-12 are random
----@return string nonce The generated nonce
-local function generate_nonce()
-    local time = math.floor(os.epoch("utc")/1000)
-    local id = os.getComputerID()
-    
-    local time_bytes = string.char(bit32.extract(time, 0, 8), bit32.extract(time, 8, 8), bit32.extract(time, 16, 8), bit32.extract(time, 24, 8))
-    local id_bytes = string.char(bit32.extract(id, 0, 8), bit32.extract(id, 8, 8))
-    local random_bytes = string.char(math.random(0xff), math.random(0xff), math.random(0xff), math.random(0xff), math.random(0xff), math.random(0xff))
-
-    return time_bytes .. id_bytes .. random_bytes
-end
-
 ---Generate the matrix state
 ---@param key string A 32 character long string
 ---@param block_count number The current block count
@@ -98,10 +85,11 @@ end
 ---@param key string
 ---@param nonce string
 ---@param length integer
+---@param initial_block_count integer
 ---@return integer[] keystream
-local function generate_keystream(key, nonce, length)
+local function generate_keystream(key, nonce, length, initial_block_count)
     local keystream = {}
-    for block_count = 1, math.ceil(length / 64) do
+    for block_count = initial_block_count, math.ceil(length / 64) + initial_block_count do
         local block = generate_keystream_block(key, nonce, block_count)
 
         for _, word in ipairs(block) do
@@ -110,6 +98,8 @@ local function generate_keystream(key, nonce, length)
                 table.insert(keystream, byte)
             end
         end
+
+        utils.yield(10, block_count)
     end
 
     return keystream
@@ -119,20 +109,36 @@ end
 ---@param plaintext string The text to encrypt
 ---@param key string A 32 character long string
 ---@param nonce? string A random string 12 bytes long, if unspecified automaticaly generated.
+---@param byte_offset? integer How many bytes that have already been encrypted using this key and nonce, defaults to 0
 ---@return string ciphertext The encrypted text
 ---@return string nonce The nonce used to encrypt the text
-local function encrypt(plaintext, key, nonce)
-    if nonce == nil then nonce = generate_nonce() end
+local function encrypt(plaintext, key, nonce, byte_offset)
+    if byte_offset == nil then byte_offset = 0 end
+    if nonce == nil then
+        nonce = crypto.random_bytes(12)
+    end
 
-    local keystream = generate_keystream(key, nonce, #plaintext)
+    local block_count = math.floor(byte_offset/64)
+    local remaining_offset = byte_offset % 64
+
+    local keystream_length = #plaintext + remaining_offset
+    local keystream = generate_keystream(key, nonce, keystream_length, block_count)
 
     local cipherbytes = {}
     for i = 1, #plaintext do
-        local plainbyte = string.byte(string.sub(plaintext, i))
-        table.insert(cipherbytes, bit32.bxor(keystream[i], plainbyte))
+        local plainbyte = string.byte(plaintext, i)
+        local cipherbyte = bit32.bxor(keystream[i+remaining_offset], plainbyte)
+        cipherbytes[i] = string.char(cipherbyte)
+
+        utils.yield(4096, i)
     end
 
-    return string.char(table.unpack(cipherbytes)), nonce
+    return table.concat(cipherbytes), nonce
 end
 
-return {crypt = encrypt}
+return {
+    crypt = encrypt,
+    generate_keystream = generate_keystream,
+    generate_keystream_block =
+        generate_keystream_block
+}

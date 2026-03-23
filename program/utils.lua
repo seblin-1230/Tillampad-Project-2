@@ -1,3 +1,5 @@
+---@diagnostic disable: deprecated
+local completion = require "cc.completion"
 local utils = {}
 
 ---Create a shallow copy of a table1
@@ -16,7 +18,7 @@ end
 ---@return number
 function utils.add32(...)
     local sum = 0
-    local args = {...}
+    local args = { ... }
     for _, number in ipairs(args) do
         sum = bit32.band((sum + number), 0xffffffff)
     end
@@ -52,7 +54,7 @@ end
 ---@param num integer
 ---@return table
 function utils.bytes_from_int32(num)
-    return {bit32.extract(num, 0, 8), bit32.extract(num, 8, 8), bit32.extract(num, 16, 8), bit32.extract(num, 24, 8)}
+    return { bit32.extract(num, 0, 8), bit32.extract(num, 8, 8), bit32.extract(num, 16, 8), bit32.extract(num, 24, 8) }
 end
 
 ---Convert an integer into a hex string padded by "pad" using 0s
@@ -78,11 +80,116 @@ end
 ---@return ...
 function utils.pullEventOverride(event)
     repeat
----@diagnostic disable-next-line: lowercase-global
+        ---@diagnostic disable-next-line: lowercase-global
         event_new, data = os.pullEventRaw(event)
     until event_new ~= "terminate"
 
     return event_new, data
+end
+
+---Convert a string into a string of 2 digit hex numbers, usefull for saving encrypted data in filenames
+---@param str string
+---@return string
+function utils.hex_from_string(str)
+    local hex = {}
+    for i = 1, #str do
+        hex[i] = string.format("%02x", string.byte(str, i))
+    end
+
+    return table.concat(hex)
+end
+
+---Convert a hex string into a string of characters
+---@param hex any
+---@return string
+function utils.string_from_hex(hex)
+    local str = {}
+
+    for i = 1, #hex, 2 do
+        table.insert(str, string.char(tonumber(string.sub(hex, i, i + 1), 16) --[[@as integer]]))
+    end
+
+    return table.concat(str)
+end
+
+---Split a string at char
+---@param str string
+---@param char string
+---@return table
+function utils.split_by_char(str, char)
+    local split = {}
+
+    for sub_str in string.gmatch(str, char) do
+        table.insert(split, sub_str)
+    end
+
+    return split
+end
+
+---Yields exection temporaraly to prevent "To long without yielding" errors
+---@param yeild_on integer? What iterations to yield on, 1 is every, 2 every other and so on. Defaults to 1
+---@param iteration integer? The current iteration
+function utils.yield(yeild_on, iteration)
+    yeild_on = yeild_on or 1
+    iteration = iteration or 0
+
+    if iteration % yeild_on == 0 then
+        os.queueEvent("yield")
+        os.pullEvent("yield")
+    end
+end
+
+---Clears all the lines up to 'line'
+---@param line integer
+function utils.clear_up_to(line)
+    local _, start_y = term.getCursorPos()
+    for i = 1, start_y - line do
+        term.setCursorPos(1, start_y - i)
+        term.clearLine()
+    end
+end
+
+---Draws an inline progress bar
+---@param x integer
+---@param y integer
+---@param current integer
+---@param total integer
+---@param width integer
+function utils.draw_inline_bar(x, y, current, total, width)
+    local percent = current / total
+    local filled_len = math.floor(percent * width)
+    local empty_len = width - filled_len
+
+
+    term.setCursorPos(x, y)
+    
+    term.setTextColor(colors.green)
+    term.write(string.rep("\143", filled_len))
+    term.setTextColor(colors.gray)
+    term.write(string.rep("\143", empty_len))
+    term.setTextColor(colors.white)
+end
+
+---Find all files in root recursivly
+---@param root string The folder to search from
+---@param blacklist {[string]: boolean} A blacklist to not include/not search, format: {filename_to_blacklist = true}
+function utils.recursive_file_list(root, blacklist)
+    local files = {}
+
+    for _, file in ipairs(fs.list(root)) do
+        if blacklist[file] then goto continue end
+        local path = fs.combine(root, file)
+
+        if fs.isDir(path) then
+            local dir_files = utils.recursive_file_list(path, blacklist)
+            table.move(dir_files, 1, #dir_files, #files, files)
+        else
+            table.insert(files, path)
+        end
+        ::continue::
+    end
+
+    return files
 end
 
 return utils
