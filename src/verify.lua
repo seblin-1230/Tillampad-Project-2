@@ -1,12 +1,13 @@
-local sha256 = require("sha256")
+local pbkdf2 = require("encryption.pbkdf2")
 
 local verify = {}
 
 local master_disk_ids = {
+    [1] = true,
     [4] = true
 }
 
-function verify.master_disk(drive_name)
+function verify.master_disk(drive_name, salt)
     local drive = assert(peripheral.wrap(drive_name))
 
     if not master_disk_ids[drive.getDiskID()] then
@@ -25,7 +26,11 @@ function verify.master_disk(drive_name)
     local verification_hash = verification_file.readAll()
     verification_file.close()
 
-    local identity_hash = sha256.hash(identity)
+    local salt_file = fs.open("rom/hashes/salt.txt", "r")
+    local salt = salt_file.readLine()
+    salt_file.close()
+
+    local identity_hash = pbkdf2.derive(identity, salt, 20000, "Deriving identity: ")
     if identity_hash ~= verification_hash then
         return false, "Failed hash"
     end

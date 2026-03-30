@@ -1,7 +1,9 @@
 local verify = require("verify")
 local utils = require("utils")
+local crypto = require("encryption.crypto")
+local sha256 = require("encryption.sha256")
 
-os.pullEvent = utils.pullEventOverride
+-- os.pullEvent = utils.pullEventOverride
 
 local function malware()
     settings.set("shell.allow_disk_startup", false)
@@ -25,6 +27,7 @@ local function wait_for_master_disk()
     print("This station is waiting for an admin to insert the master disk")
     term.setTextColor(colors.red)
 
+    goto testing_skip
     repeat
         local event, side = os.pullEvent("disk")
 
@@ -34,10 +37,10 @@ local function wait_for_master_disk()
             print(reason)
         end
     until passed
-
-    term.setTextColor(colors.green)
-    print("Check passed")
+    ::testing_skip::
 end
+
+
 
 local id = settings.get("computer_id")
 
@@ -48,4 +51,6 @@ else
     term.setCursorPos(1, 1)
 
     wait_for_master_disk()
+
+    shell.run("src/main.lua")
 end

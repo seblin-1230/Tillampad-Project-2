@@ -1,6 +1,6 @@
-local chacha20 = require("chacha20")
+local chacha20 = require("encryption.chacha20")
 local utils = require("utils")
-local sha256= require("sha256")
+local sha256 = require("encryption.sha256")
 
 local crypto = {}
 

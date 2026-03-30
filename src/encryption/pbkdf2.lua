@@ -1,5 +1,5 @@
 local utils = require "utils"
-local hmac = require "hmac_sha256"
+local hmac = require "encryption.hmac_sha256"
 
 local pbkdf2 = {}
 
