@@ -12,8 +12,8 @@ local function parse_message(message)
     
 end
 
-local function build_message(type, message)
-    if #type > 8 then
+local function build_message(message_type, message)
+    if #message_type > 8 then
         error("Type to long, max 8 chars")
     end
 
@@ -26,7 +26,7 @@ local function build_message(type, message)
     end
     local id_string = table.concat(id_table)
     
-    return nonce .. type .. id_string .. encrypted_payload
+    return nonce .. message_type .. id_string .. encrypted_payload
 end
 
 function encnet.open(modem, new_session_key)
@@ -43,12 +43,17 @@ function encnet.isOpen(modem)
     return rednet.isOpen(modem)
 end
 
-function encnet.send(recipient, type, message, protocol)
-    local built_message = build_message(type, message)
+function encnet.send(recipient, message_type, message, protocol)
+    local built_message = build_message(message_type, message)
     return rednet.send(recipient, built_message, protocol)
 end
 
-function encnet.()
+function encnet.broadcast(message_type, message, protocol)
+    local built_message = build_message(message_type, message)
+    return rednet.broadcast(built_message, protocol)
+end
+
+function encnet.receive()
     
 end
 
