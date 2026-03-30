@@ -21,6 +21,6 @@ term.setTextColor(colors.white)
 
 local session_key = generate_session_key()
 
-encnet.open(modem, session_key)
+encnet.open(peripheral.getName(modem), session_key)
 
 encnet.send(1, "Testing-", "This is a message to test the encnet system")
