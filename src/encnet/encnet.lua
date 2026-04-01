@@ -8,8 +8,14 @@ local utils  = require("utils")
 
 local session_key
 
+---Parse a encnet message into normal content
+---@param message string
 local function parse_message(message)
-    
+    local nonce = message:sub(1, 12)
+    local message_type = message:sub(13, 20)
+    local payload = message:sub(21, #message)
+
+    return message_type, chacha20.crypt(payload, session_key, nonce)
 end
 
 local function build_message(message_type, message)
@@ -53,8 +59,21 @@ function encnet.broadcast(message_type, message, protocol)
     return rednet.broadcast(built_message, protocol)
 end
 
-function encnet.receive()
-    
+function encnet.receive(protocol_filter, timeout)
+    local event, message = rednet.receive(protocol_filter, timeout)
+    return parse_message(message)
+end
+
+function encnet.host(protocol, hostname)
+    rednet.host(protocol, hostname)
+end
+
+function encnet.unhost(protocol)
+    rednet.unhost(protocol)
+end
+
+function encnet.lookup(protocol, hostname)
+    rednet.lookup(protocol, hostname)
 end
 
 return encnet
