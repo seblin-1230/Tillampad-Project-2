@@ -1,4 +1,4 @@
-local encnet = {}
+local comms = {}
 
 local chacha20 = require("encryption.chacha20")
 local crypto = require("encryption.crypto")
@@ -8,7 +8,7 @@ local utils  = require("utils")
 
 local session_key
 
----Parse a encnet message into normal content
+---Parse a comms message into normal content
 ---@param message string
 local function parse_message(message)
     local nonce = message:sub(1, 12)
@@ -35,45 +35,45 @@ local function build_message(message_type, message)
     return nonce .. message_type .. id_string .. encrypted_payload
 end
 
-function encnet.open(modem, new_session_key)
+function comms.open(modem, new_session_key)
     rednet.open(modem)
     session_key = new_session_key
 end
 
-function encnet.close(modem)
+function comms.close(modem)
     rednet.close(modem)
     session_key = nil
 end
 
-function encnet.isOpen(modem)
+function comms.isOpen(modem)
     return rednet.isOpen(modem)
 end
 
-function encnet.send(recipient, message_type, message, protocol)
+function comms.send(recipient, message_type, message, protocol)
     local built_message = build_message(message_type, message)
     return rednet.send(recipient, built_message, protocol)
 end
 
-function encnet.broadcast(message_type, message, protocol)
+function comms.broadcast(message_type, message, protocol)
     local built_message = build_message(message_type, message)
     return rednet.broadcast(built_message, protocol)
 end
 
-function encnet.receive(protocol_filter, timeout)
+function comms.receive(protocol_filter, timeout)
     local event, message = rednet.receive(protocol_filter, timeout)
     return parse_message(message)
 end
 
-function encnet.host(protocol, hostname)
+function comms.host(protocol, hostname)
     rednet.host(protocol, hostname)
 end
 
-function encnet.unhost(protocol)
+function comms.unhost(protocol)
     rednet.unhost(protocol)
 end
 
-function encnet.lookup(protocol, hostname)
+function comms.lookup(protocol, hostname)
     rednet.lookup(protocol, hostname)
 end
 
-return encnet
+return comms
