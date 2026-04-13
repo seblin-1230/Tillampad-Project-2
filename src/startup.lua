@@ -1,5 +1,5 @@
 local verify = require("verify")
-local utils = require("src.libs.utils")
+local utils = require("libs.utils")
 local crypto = require("libs.encryption.crypto")
 local sha256 = require("libs.encryption.sha256")
 

@@ -1,5 +1,5 @@
 local sha256 = require "encryption.sha256"
-local utils = require "src.libs.utils"
+local utils = require "libs.utils"
 
 local hmac_sha256 = {}
 

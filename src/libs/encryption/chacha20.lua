@@ -1,4 +1,4 @@
-local utils = require("src.libs.utils")
+local utils = require("libs.utils")
 
 ---Generate the matrix state
 ---@param key string A 32 character long string

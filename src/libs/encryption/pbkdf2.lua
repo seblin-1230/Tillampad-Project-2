@@ -1,4 +1,4 @@
-local utils = require "src.libs.utils"
+local utils = require "libs.utils"
 local hmac = require "encryption.hmac_sha256"
 
 local pbkdf2 = {}

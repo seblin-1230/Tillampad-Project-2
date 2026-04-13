@@ -15,6 +15,11 @@ local function generate_session_key()
     return utils.string_from_hex(sha256.hash(base))
 end
 
+---Start the teleport process to a destination
+---@param destination integer
+local function initiate_teleport(destination)
+    local route = routing.find_route(destination)
+end
 
 -- term.clear()
 -- term.setCursorPos(1, 1)
@@ -22,6 +27,4 @@ end
 
 local session_key = "aVUD5IqcE6E27lVRlByso9tN1IQC3Sdn" --generate_session_key()
 
-comms.open(peripheral.getName(modem), session_key)
-
-comms.send(1, "Testing-", "This is a message to test the encnet system")
+initiate_teleport(1)
