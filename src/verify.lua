@@ -1,4 +1,4 @@
-local pbkdf2 = require("encryption.pbkdf2")
+local pbkdf2 = require("libs.encryption.pbkdf2")
 
 local verify = {}
 

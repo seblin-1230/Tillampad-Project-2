@@ -1,7 +1,7 @@
 local verify = require("verify")
-local utils = require("utils")
-local crypto = require("encryption.crypto")
-local sha256 = require("encryption.sha256")
+local utils = require("src.libs.utils")
+local crypto = require("libs.encryption.crypto")
+local sha256 = require("libs.encryption.sha256")
 
 -- os.pullEvent = utils.pullEventOverride
 

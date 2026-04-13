@@ -1,5 +1,5 @@
-local pbkdf2 = require("encryption.pbkdf2")
-local crypto = require("encryption.crypto")
+local pbkdf2 = require("libs.encryption.pbkdf2")
+local crypto = require("libs.encryption.crypto")
 
 local identity_file = fs.open("src/identity.txt", "r")
 local identity = identity_file.readAll()

@@ -3,7 +3,7 @@ local comms    = {}
 local chacha20 = require("encryption.chacha20")
 local crypto   = require("encryption.crypto")
 local sha256   = require("encryption.sha256")
-local utils    = require("utils")
+local utils    = require("src.libs.utils")
 
 
 local session_key
