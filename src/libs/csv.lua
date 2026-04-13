@@ -8,10 +8,10 @@ function csv.read_file(path)
     for line in io.lines(path, "l") do
         local split = {}
 
-        print(line)
         for sub_str in string.gmatch(line, "[^,]+") do
             local value = sub_str --[[@type string|number?]]
-            if sub_str:match("^[%d|-]+$") then
+
+            if sub_str:match("^[%d|-]+$") ~= nil then
                 value = tonumber(sub_str)
             end
 
