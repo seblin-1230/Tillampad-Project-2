@@ -52,6 +52,6 @@ else
 
     wait_for_master_disk()
 
-    _G.comms = require("encnet.comms")
+    _G.comms = require("libs.encnet.comms")
     -- shell.run("src/main.lua")
 end

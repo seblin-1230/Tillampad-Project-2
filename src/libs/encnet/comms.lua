@@ -1,6 +1,6 @@
 local comms    = {}
 
-local chacha20 = require("encryption.chacha20")
+local chacha20 = require("libs.encryption.chacha20")
 
 
 local session_key

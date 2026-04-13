@@ -1,6 +1,6 @@
 local sha256  = require("libs.encryption.sha256")
 local crypto  = require("libs.encryption.crypto")
-local utils   = require("src.libs.utils")
+local utils   = require("libs.utils")
 local routing = require("routing")
 
 local modem = peripheral.find("modem")
