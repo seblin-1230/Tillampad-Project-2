@@ -15,12 +15,12 @@ local function generate_session_key()
 end
 
 
-term.clear()
-term.setCursorPos(1, 1)
-term.setTextColor(colors.white)
+-- term.clear()
+-- term.setCursorPos(1, 1)
+-- term.setTextColor(colors.white)
 
-local session_key = generate_session_key()
+local session_key = "aVUD5IqcE6E27lVRlByso9tN1IQC3Sdn" --generate_session_key()
 
-encnet.open(peripheral.getName(modem), session_key)
+comms.open(peripheral.getName(modem), session_key)
 
-encnet.send(1, "Testing-", "This is a message to test the encnet system")
+comms.send(1, "Testing-", "This is a message to test the encnet system")

@@ -13,10 +13,11 @@ local session_key
 local function parse_message(message)
     local nonce = message:sub(1, 12)
     local message_type = message:sub(13, 20)
-    local payload = message:sub(21, #message)
+    local sender = message:sub(21, 24):byte(1, 4)
+    local payload = message:sub(25, #message)
     local decrypted = chacha20.crypt(payload, session_key, nonce)
 
-    return message_type, decrypted
+    return sender, message_type, decrypted
 end
 
 local function build_message(message_type, message)
@@ -27,11 +28,7 @@ local function build_message(message_type, message)
     local encrypted_payload, nonce = chacha20.crypt(message, session_key)
 
     local id = os.computerID()
-    local id_table = {}
-    for i = 0, 3 do
-        id_table[i + 1] = string.char(bit32.extract(id, i * 8, 8))
-    end
-    local id_string = table.concat(id_table)
+    local id_string = string.char(bit32.extract(id, 0, 8), bit32.extract(id, 8, 8), bit32.extract(id, 16, 8), bit32.extract(id, 24, 8))
 
     return nonce .. message_type .. id_string .. encrypted_payload
 end
@@ -82,8 +79,8 @@ function comms.receive(protocol_filter, timeout)
     local sender, message, protocol = rednet.receive(protocol_filter, timeout)
     if not sender then return nil end
 
-    local message_type, payload = parse_message(message)
-    return sender, message_type, payload, protocol
+    local true_sender, message_type, payload = parse_message(message --[[@as string]])
+    return true_sender, message_type, payload, protocol
 end
 
 ---Check if a modem is open, identical ti rednet.isOpen
