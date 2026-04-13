@@ -28,7 +28,7 @@ function routing.find_closest_station(position, stations)
         end
     end
 
-    if closest_distance > 10000 then
+    if closest_distance > 10000 or closest_station.unsafe then
         return nil
     end
 
