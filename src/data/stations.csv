@@ -1,2 +1,4 @@
-0,0,256,64,-256,Station 0,The first Station
-1,1,-256,64,256,Station 1,The second Station
+0,0,256,64,-256,Station 1,The first Station,1:2
+1,1,256,64,256,Station 2,The second Station,0:2:3
+2,2,-256,64,-256,Station 3,The third Station,0:1
+3,2,-256,64,256,Station 4, The forth Station,1

@@ -1,4 +1,4 @@
----@alias Station {computer_id: integer, position: ccTweaked.Vector, name: string, description: string, unsafe: boolean}
+---@alias Station {computer_id: integer, position: ccTweaked.Vector, name: string, description: stringlib, neighbors: integer[], unsafe: boolean}
 
 local sha256  = require("libs.encryption.sha256")
 local crypto  = require("libs.encryption.crypto")
@@ -34,6 +34,12 @@ local function read_stations()
             description = unformated_station[7],
             unsafe = false
         }
+
+        local neighbors = {}
+        for str in string.gmatch(unformated_station[8], ":") do
+            table.insert(neighbors, tonumber(str))
+        end
+
         stations[station_id] = station_info
     end
 
