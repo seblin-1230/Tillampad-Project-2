@@ -40,8 +40,36 @@ end
 ---@param destination Station|ccTweaked.Vector
 ---@param stations Station[]
 function routing.find_route(origin, destination, stations)
+    local route = {destination}
     if not destination.computer_id then
-        
+        local closest_station = routing.find_closest_station(destination, stations)
+        if not closest_station then
+            return {}
+        end
+
+        table.insert(route, 1, closest_station)
+    end
+
+
+    local visited = {} --[[@type {[Station]: Station}]]
+    local queue = {origin} --[[@type (Station[])]]
+    local last_visited --[[@type Station]]
+    local visiting --[[@type Station]]
+
+    while true do
+        visiting = queue[1]
+        table.remove(queue, 1)
+
+        if visiting == route[1] then
+            if last_visited == nil then
+                break
+            else
+                table.insert(route, 1, visited[last_visited])
+                last_visited = visited[last_visited]
+            end
+        else
+            
+        end
     end
 end
 

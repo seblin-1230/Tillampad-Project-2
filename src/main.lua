@@ -8,7 +8,6 @@ local routing = require("routing")
 
 local modem = peripheral.find("modem")
 
-
 local function generate_session_key()
     local key_count = settings.get("station.key_count")
     local base = tostring(os.epoch("utc")) .. tostring(os.computerID()) .. tostring(key_count) .. crypto.random_bytes(64)
@@ -46,11 +45,17 @@ local function read_stations()
     return stations
 end
 
+---Get the data for this station
+---@return Station
+local function read_this_station()
+    
+end
+
 ---Start the teleport process to a destination
 ---@param destination Station
 ---@param stations Station[]
 local function initiate_teleport(destination, stations)
-    local route = routing.find_route(destination, stations)
+    local route = routing.find_route(, destination, stations)
 end
 
 -- term.clear()
@@ -59,6 +64,7 @@ end
 
 local session_key = "aVUD5IqcE6E27lVRlByso9tN1IQC3Sdn" --generate_session_key()
 local stations = read_stations()
+local this = read_this_station()
 
 print(textutils.serialise(stations))
 
