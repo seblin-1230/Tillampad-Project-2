@@ -1,3 +1,5 @@
+---@alias Station {computer_id: integer, position: ccTweaked.Vector, name: string, description: string, unsafe: boolean}
+
 local sha256  = require("libs.encryption.sha256")
 local crypto  = require("libs.encryption.crypto")
 local utils   = require("libs.utils")
@@ -15,10 +17,32 @@ local function generate_session_key()
     return utils.string_from_hex(sha256.hash(base))
 end
 
+---Get all the stations saved to file
+---@return Station[]
+local function read_stations()
+    local unformated_stations = csv.read_file("src/data/stations.csv")
+
+    local stations = {}
+    for i, unformated_station in ipairs(unformated_stations) do
+        local station_id = unformated_station[1]
+        local station_info = {
+            computer_id = unformated_station[2],
+            position = vector.new(unformated_station[3], unformated_station[4], unformated_station[5]),
+            name = unformated_station[6],
+            description = unformated_station[7],
+            unsafe = false
+        }
+        stations[station_id] = station_info
+    end
+
+    return stations
+end
+
 ---Start the teleport process to a destination
----@param destination integer
-local function initiate_teleport(destination)
-    local route = routing.find_route(destination)
+---@param destination Station
+---@param stations Station[]
+local function initiate_teleport(destination, stations)
+    local route = routing.find_route(destination, stations)
 end
 
 -- term.clear()
@@ -26,5 +50,8 @@ end
 -- term.setTextColor(colors.white)
 
 local session_key = "aVUD5IqcE6E27lVRlByso9tN1IQC3Sdn" --generate_session_key()
+local stations = read_stations()
 
-initiate_teleport(1)
+print(textutils.serialise(stations))
+
+initiate_teleport(stations[1], stations)
