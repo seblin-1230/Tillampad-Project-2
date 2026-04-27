@@ -1,5 +1,7 @@
 local verify = require("verify")
-local utils = require("libs.utils")
+local csv    = require("libs.csv")
+local logger = require("main.logger")
+local utils  = require("libs.utils")
 local crypto = require("libs.encryption.crypto")
 local sha256 = require("libs.encryption.sha256")
 
@@ -40,7 +42,13 @@ local function wait_for_master_disk()
     ::testing_skip::
 end
 
+---Get the data for this station
+---@return number
+local function read_this_station_id()
+    local unformated_station = csv.read_file("src/data/individual_stations/station_" .. tostring(os.computerID()) .. ".csv")[1]
 
+    return unformated_station[1]
+end
 
 local id = settings.get("computer_id")
 
@@ -52,6 +60,7 @@ else
 
     wait_for_master_disk()
 
+    logger:new({station_id = read_this_station_id()})
     _G.comms = require("libs.encnet.comms")
     -- shell.run("src/main.lua")
 end

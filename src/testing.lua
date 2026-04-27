@@ -1,23 +1,32 @@
-local pbkdf2 = require("libs.encryption.pbkdf2")
-local crypto = require("libs.encryption.crypto")
+local communication = require("main.communication")
 
-local identity_file = fs.open("src/identity.txt", "r")
-local identity = identity_file.readAll()
-identity_file.close()
+local sha256 = require("libs.encryption.sha256")
+local logger = require("main.logger")
 
-local salt = crypto.random_bytes(32)
-print(salt)
-local identity_hash = pbkdf2.derive(identity, salt, 20000, "Deriving identity: ")
+-- local session_key = "aVUD5IqcE6E27lVRlByso9tN1IQC3Sdn" --generate_session_key()
 
-local master_disk_identity = fs.open("master_disk_identity.hash", "w")
-local salt_file = fs.open("salt.txt", "w")
-master_disk_identity.write(identity_hash)
-salt_file.write(salt)
-master_disk_identity.close()
-salt_file.close()
+-- local data = ""
 
--- local enc, nonce = chacha20.crypt(message, "Hello this is the key and i stil")
--- print(enc)
+-- for i = 1, 10000 do
+--     data = data .. "hhhhhhhhhhhhhhhhhhhh"
+-- end
+-- print("data concatinated")
 
--- local dec, nonce = chacha20.crypt(enc, "Hello this is the key and i stil", nonce)
--- print(dec)
+-- local time_sum = 0
+
+-- for i = 1, 100 do
+--     local t0 = os.epoch("utc")
+--     sha256.hash(data)
+--     local t = os.epoch("utc")
+
+--     time_sum = time_sum + (t - t0)
+
+--     if i % 100 == 0 then print(i) end
+--     os.sleep(0)
+-- end
+
+-- print("Avrage_time: ", time_sum/1000000)
+
+logger:new({station_id = 0})
+
+LOGGER:info("test")

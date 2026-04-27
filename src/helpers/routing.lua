@@ -58,7 +58,9 @@ function routing.find_route(origin, destination, stations)
 
     while true do
         visiting = queue[1]
+        print(visiting)
         table.remove(queue, 1)
+        print(visiting)
 
         if visiting == route[1] then
             if last_visited == nil then
@@ -68,9 +70,13 @@ function routing.find_route(origin, destination, stations)
                 last_visited = visited[last_visited]
             end
         else
-            
+            table.move(visiting.neighbors, 1, #visiting.neighbors, #queue, queue)
+            visited[visiting] = last_visited
+            last_visited = visiting
         end
     end
+
+    return route
 end
 
 return routing

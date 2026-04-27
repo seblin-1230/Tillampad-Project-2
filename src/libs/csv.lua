@@ -6,6 +6,7 @@ function csv.read_file(path)
     local lines = {}
     local i = 1
     for line in io.lines(path, "l") do
+        -- print(line)
         local split = {}
 
         for sub_str in string.gmatch(line, "[^,]+") do

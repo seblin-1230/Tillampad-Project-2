@@ -182,7 +182,7 @@ function utils.recursive_file_list(root, blacklist)
 
         if fs.isDir(path) then
             local dir_files = utils.recursive_file_list(path, blacklist)
-            table.move(dir_files, 1, #dir_files, #files, files)
+            table.move(dir_files, 1, #dir_files, #files + 1, files)
         else
             table.insert(files, path)
         end
