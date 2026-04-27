@@ -21,7 +21,7 @@
 ### Route list
 	The route the user is taking to teleport to their destination. Takes the form of a list containing an arbitrary number of stations and optionaly ending in a  coordinates at the end
 ### System hash
-	A hash made from all the files on a computer and all the peripherals connected to a computer (exluding drives) recalculated on the fly and no parts of it saved to the disk
+		A hash made from all the files on a computer and all the peripherals connected to a computer (exluding drives) recalculated on the fly and no parts of it saved to the disk
 Calculated with: hash(all_files_hashed + all_periferals_hashed) 
 ### Nonce
 	A string of randomly generated characters used to verify that the hashes sent between two stations aren't saved previous versions
@@ -41,8 +41,8 @@ title: "Message Format"
 packet-beta
 0-11: "Nonce (12 Bytes)"
 12-19: "Type (8 Bytes)"
-20-21: "ID(2Bytes)"
-22-31: "Payload (...)"
+20-23: "ID(4Bytes)"
+24-31: "Payload (...)"
 ```
 ### Teleport initiate
 	The message sent when a station wants to teleport a user to another station
@@ -90,7 +90,7 @@ packet-beta
 ```
 ### Session key request
 	A request sent from a station after the master disk is inserted after startup
-	Type: SeKeyReq (is not encrypted)
+	Type: SeKeyReq
 ```mermaid
 ---
 title: "Payload Format"
@@ -100,7 +100,7 @@ packet-beta
 ```
 ### Session key response
 	A response sent to a station after a station has been verified to have the master secret
-	Type: SeKeyRes (is not encrypted)
+	Type: SeKeyRes
 ```mermaid
 ---
 title: "Payload Format"

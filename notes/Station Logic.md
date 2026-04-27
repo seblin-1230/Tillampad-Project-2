@@ -25,13 +25,13 @@ But then I thought about if this even was an issue? Does it matter if anyone can
 
 With the new logic the biggest vulnerability a station has is between the server restarting and the master disk being inserted. As during this time the station dosn't have any critical data that would be wiped by breaking the computer, and if you can break the computer you can put it in a disk drive and read/write to it. But as I said it is not **that** big of an issue if a determined attacker can create a master disk as all it would allow them to do is restart the network since the session key is never exposed any where.
 Right?
-But the problem is that since the sessio key is encrypted with the master secret when sent between stations an attacker can create a master disk where they know the master secret and create a computer that wiretaps the communication between Station A and Station B. Then when Station A sends the encrypted session key the attacker can just decrypt it and now the attacker knows the session key. 
+But the problem is that since the session key is encrypted with the master secret when sent between stations an attacker can create a master disk where they know the master secret and create a computer that wiretaps the communication between Station A and Station B. Then when Station A sends the encrypted session key the attacker can just decrypt it and now the attacker knows the session key. 
 
 My first idea was to solve this by generating a new key every 10-20 min but how would it be transmited, with the old session key? the one that is compromised? No that won't work.
 
 But if I can't make it impossible I might as well make it really really annoying. The first step is adding a thing to the startup.lua that detects if it is being run from a disk. eg an attacker mined the station computer and put it in a disk drive without disabling list.allow_boot_from_disk, then if it is being run from a disk it prevents itself from being terminated by overiding os.pullEvent with os.pullEventRaw and ignoreing all terminate events, then it creates a new startup.lua in the main hdd of the attackers computer and writes code that makes the computer just quietly shut down then it deletes all the files on the attackers computer (exept the new startup.lua) then disables list.allow_boot_from_disk on the attackers computer. Then it shuts the computer down, it does all od this quietly witout printing anything.
 
-This is ofcourse not enough to deter even a silightly above avarege cc tweaked user as they can just make a new computer and dissable list.allow_boot_from_disk before inserting the station computer.
+This is ofcourse not enough to deter even a silightly above avarege cc tweaked user as they can just make a new computer and disable list.allow_boot_from_disk before inserting the station computer.
 My best bet at doing anything more than annoy someone for 10 seconds until they open google is to create a global salt that is hashed with the master disk contents and the admin pin then compared to a hash on the master disk.
 This salt can't be just plain text in the startup script as that can be easily read/written, it will need to be obfuscated, this is not ideal and i would prefer it be impossible to read/write as there is no security through obscurity it will have to do.
 
@@ -44,7 +44,13 @@ There are many ways to obfuscate the salt, and i will go with as many as i can. 
 - Creating a salt function and then later reassigning it in a load() call
 
 But I will start by using a datapack to add a hash of the master disk contents to ROM and use that as the master disk verification
-#### Logic
+
+---
+On station creation generate an encryption key from the master disk and some salt
+Use this encryption key to encrypt a verification phrase 
+Then on master disk verification generate the encryption key and check if the decrypted verification phrase is correct
+If so return true and the encryption key
+#### OLD Logic
 1. Station reads identity.txt from $master\_disk$ as $identity$
 2. Station checks if $hash(identity)=master\_hash$
 3. If it does return true

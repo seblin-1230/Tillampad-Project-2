@@ -1,10 +1,12 @@
+local routing = require("helpers.routing")
+
 local Hash_station = require("helpers.hash_station")
 
 local teleport = {}
 
 ---Initiate teleport
 ---@param sender integer
----@param payload {station_hash: string} | {}
+---@param payload {station_hash: string} | {destination: Station | ccTweaked.Vector}
 ---@param external boolean
 ---@return boolean
 function teleport.initiate(sender, payload, external)
@@ -12,7 +14,8 @@ function teleport.initiate(sender, payload, external)
         
         return true
     else
-        local station_hash = Hash_station(os.computerID())
+        LOGGER:info("Initiating teleport from " .. tostring(get_this_station()) .. " to " .. tostring(payload.destination))
+        local route = routing.find_route(get_this_station(), payload.destination, get_stations())
         return true
     end
 end

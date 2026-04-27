@@ -63,10 +63,18 @@ local function hash_peripherals()
     return peripheral_hash
 end
 
+local function hash_blocks()
+    -- TODO Add this
+    return ""
+end
+
 function Hash_station(computer_id)
     LOGGER:info("Initiating station hashing")
     local file_hash = hash_files()
     local peripheral_hash = hash_peripherals()
+    local block_hash = hash_blocks()
+
+    return sha256.hash(file_hash .. peripheral_hash .. block_hash .. tostring(computer_id))
 end
 
 return Hash_station

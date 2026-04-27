@@ -5,7 +5,7 @@ local LOGGER = {}
 
 local function log_path(station_id)
     local time = os.date("%F")
-    local base = "/logs/" .. tostring(station_id) .. "-" .. time .. "-"
+    local base = "/logs/TeleNet-" .. tostring(station_id) .. "-" .. time .. "-"
 
     for i = 1, 100 do
         local path = base .. tostring(i) .. ".log"
@@ -32,20 +32,26 @@ function LOGGER:new(o)
 end
 
 function LOGGER:info(...)
+    local info = debug.getinfo(2, "Sl")
+    local source = info.source:gsub("^@", "")
     local time = os.date("[%T]")
-    self.log_file.writeLine(time .. " [INFO]    : " .. format(...))
+    self.log_file.writeLine(time .. " [INFO] [" .. source .. ":" .. info.currentline .. "] : " .. format(...))
     self.log_file.flush()
 end
 
 function LOGGER:warning(...)
+    local info = debug.getinfo(2, "Sl")
+    local source = info.source:gsub("^@", "")
     local time = os.date("[%T]")
-    self.log_file.writeLine(time .. " [WARNING] : " .. format(...))
+    self.log_file.writeLine(time .. " [WARNING] [" .. source .. ":" .. info.currentline .. "] : " .. format(...))
     self.log_file.flush()
 end
 
 function LOGGER:error(...)
+    local info = debug.getinfo(2, "Sl")
+    local source = info.source:gsub("^@", "")
     local time = os.date("[%T]")
-    self.log_file.writeLine(time .. " [ERROR]   : " .. format(...))
+    self.log_file.writeLine(time .. " [ERROR] [" .. source .. ":" .. info.currentline .. "] : " .. format(...))
     self.log_file.flush()
 end
 

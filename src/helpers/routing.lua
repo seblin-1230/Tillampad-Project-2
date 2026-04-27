@@ -42,11 +42,14 @@ end
 function routing.find_route(origin, destination, stations)
     local route = {destination}
     if not destination.computer_id then
+        LOGGER:info("Destination coordinates, finding closest station")
         local closest_station = routing.find_closest_station(destination, stations)
         if not closest_station then
+            LOGGER:warning("No stations within 10k blocks of destination, aborting")
             return {}
         end
 
+        LOGGER:info("Closest station " .. tostring(closest_station) .. " at " .. tostring(closest_station.position))
         table.insert(route, 1, closest_station)
     end
 
@@ -55,12 +58,10 @@ function routing.find_route(origin, destination, stations)
     local queue = {origin} --[[@type (Station[])]]
     local last_visited --[[@type Station]]
     local visiting --[[@type Station]]
-
+    -- PROBLEM visiting expects Station but queue stores station ids
     while true do
         visiting = queue[1]
-        print(visiting)
         table.remove(queue, 1)
-        print(visiting)
 
         if visiting == route[1] then
             if last_visited == nil then
@@ -70,7 +71,10 @@ function routing.find_route(origin, destination, stations)
                 last_visited = visited[last_visited]
             end
         else
-            table.move(visiting.neighbors, 1, #visiting.neighbors, #queue, queue)
+            LOGGER:info(textutils.serialise(queue))
+            LOGGER:info(textutils.serialise(visiting.neighbors))
+            table.move(visiting.neighbors, 1, #visiting.neighbors, #queue + 1, queue)
+            
             visited[visiting] = last_visited
             last_visited = visiting
         end
