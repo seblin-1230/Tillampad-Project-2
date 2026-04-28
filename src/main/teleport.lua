@@ -15,8 +15,8 @@ function teleport.initiate(sender, payload, external)
         return true
     else
         LOGGER:info("Initiating teleport from " .. tostring(get_this_station()) .. " to " .. tostring(payload.destination))
-        local route = routing.find_route(get_this_station(), payload.destination, get_stations())
-        
+        local route = routing.find_route(get_this_station(), payload.destination)
+
         return true
     end
 end

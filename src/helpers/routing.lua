@@ -35,15 +35,45 @@ function routing.find_closest_station(position, stations)
     return closest_station
 end
 
+function routing.generate_adjacent()
+    local stations = get_stations()
+
+    local graph = {}
+    for id, station in pairs(stations) do
+        graph[id] = station.neighbors
+    end
+
+    return graph
+end
+
+local function bfs(graph, src, par, dist)
+    local q = {}
+    dist[src] = 0
+    table.insert(q, src)
+
+    while q ~= {} do
+        local node = table.remove(q, 1)
+        LOGGER:info(node, textutils.serialise(graph[node]))
+        for _, neighbor in pairs(graph[node]) do
+            if dist[neighbor] == math.huge then
+                par[neighbor] = node
+                dist[neighbor] = dist[node] + 1
+                table.insert(q, neighbor)
+            end
+        end
+    end
+end
+
 ---Find the best route from the current position to the destination
----@param origin Station
+---TODO Add handling for nonexistant stations, eg station 0 crashes program
+---@param source Station
 ---@param destination Station|ccTweaked.Vector
-function routing.find_route(origin, destination)
+function routing.find_route(source, destination)
     local stations = get_stations()
 
     local route = {destination}
     if not destination.computer_id then
-        LOGGER:info("Destination coordinates, finding closest station")
+        LOGGER:info("Destination is coordinates, finding closest station")
         local closest_station = routing.find_closest_station(destination, stations)
         if not closest_station then
             LOGGER:warning("No stations within 10k blocks of destination, aborting")
@@ -54,44 +84,31 @@ function routing.find_route(origin, destination)
         table.insert(route, 1, closest_station)
     end
 
+    local graph = routing.generate_adjacent()
+    local V = #graph
+    local src, des = source.station_id, destination.station_id
 
-    local visited = {} --[[@type {[Station]: Station}]]
-    local queue = {origin} --[[@type (Station[])]]
+    local par = {}
+    local dist = {}
+    for i = 1, V do
+        par[i] = -1
+        dist[i] = math.huge
+    end
 
-    local last_visited --[[@type Station]]
-    local visiting --[[@type Station]]
+    bfs(graph, src, par, dist)
 
-    while true do
-        LOGGER:info("Loop start")
-        visiting = queue[1]
-        table.remove(queue, 1)
-        
-        LOGGER:info(visiting)
+    if dist[des] == math.huge then
+        LOGGER:warning("No path found to destination")
+        return {}
+    end
 
-        if visiting == route[1] then
-            if last_visited == nil then
-                break
-            else
-                table.insert(route, 1, visited[last_visited])
-                last_visited = visited[last_visited]
-            end
-        else
-            for _, neighbor in ipairs(visiting.neighbors) do
-                local neighbor_station = stations[neighbor]
-                if visited[neighbor_station] == nil then table.insert(queue, neighbor_station) end
-            end
-
-            visited[visiting] = last_visited
-            last_visited = visiting
-        end
-        LOGGER:info("Visited ", textutils.serialise(visited, {allow_repetitions = true}))
-        LOGGER:info("Visiting ", visiting)
-        LOGGER:info("Last visited ", last_visited)
-        LOGGER:info("Queue ", textutils.serialise(queue, {allow_repetitions = true}))
+    local current_node = des
+    while par[current_node] ~= -1 do
+        table.insert(route, par[current_node])
+        current_node = par[current_node]
     end
 
     LOGGER:info("Route: ", textutils.serialise(route))
-
     return route
 end
 

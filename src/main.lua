@@ -98,13 +98,24 @@ _G.get_stations = function()
     return stations
 end
 
+_G.get_station_ids = function ()
+    local info = debug.getinfo(2, "Sl")
+    LOGGER:info("Station ids accessed from " .. info.source:gsub("^@", "") .. ":" .. info.currentline)
+
+    local ids = {}
+    for i, station in pairs(stations) do
+        ids[i] = station.station_id
+    end
+end
+
 local session_key = "aVUD5IqcE6E27lVRlByso9tN1IQC3Sdn" --generate_session_key()
 
 local function async_main()
-    teleport.initiate(os.computerID(), { destination = vector.new(0, 0, 0) }, false)
+    teleport.initiate(this_station.station_id, { destination = vector.new(0, 0, 0) }, false)
     print("Teleport done")
 end
 
+--TODO Figure out why computer 0 thinks its station_id is 0 and not 1
 parallel.waitForAll(
     function() Handle_communication(session_key) end,
     async_main
