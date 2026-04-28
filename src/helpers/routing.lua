@@ -47,13 +47,13 @@ function routing.generate_adjacent()
 end
 
 local function bfs(graph, src, par, dist)
+    LOGGER:info("Starting BFS")
     local q = {}
     dist[src] = 0
     table.insert(q, src)
 
-    while q ~= {} do
+    while #q > 0 do
         local node = table.remove(q, 1)
-        LOGGER:info(node, textutils.serialise(graph[node]))
         for _, neighbor in pairs(graph[node]) do
             if dist[neighbor] == math.huge then
                 par[neighbor] = node
@@ -61,6 +61,7 @@ local function bfs(graph, src, par, dist)
                 table.insert(q, neighbor)
             end
         end
+        os.sleep(0)
     end
 end
 
@@ -71,7 +72,7 @@ end
 function routing.find_route(source, destination)
     local stations = get_stations()
 
-    local route = {destination}
+    local route = {}
     if not destination.computer_id then
         LOGGER:info("Destination is coordinates, finding closest station")
         local closest_station = routing.find_closest_station(destination, stations)
@@ -81,12 +82,15 @@ function routing.find_route(source, destination)
         end
 
         LOGGER:info("Closest station " .. tostring(closest_station) .. " at " .. tostring(closest_station.position))
-        table.insert(route, 1, closest_station)
+        table.insert(route, destination)
+        table.insert(route, closest_station.station_id)
+    else
+        table.insert(route, destination.station_id)
     end
 
     local graph = routing.generate_adjacent()
     local V = #graph
-    local src, des = source.station_id, destination.station_id
+    local src, des = source.station_id, route[#route]
 
     local par = {}
     local dist = {}
@@ -108,7 +112,7 @@ function routing.find_route(source, destination)
         current_node = par[current_node]
     end
 
-    LOGGER:info("Route: ", textutils.serialise(route))
+    LOGGER:info("Route found: ", textutils.serialise(route, {compact = true}))
     return route
 end
 

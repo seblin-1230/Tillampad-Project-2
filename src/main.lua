@@ -62,7 +62,7 @@ local function read_stations()
     end
 
     setmetatable(stations, {
-        __tostring = function (stations) return table.concat(stations, ", ") end
+        __tostring = function(stations) return table.concat(stations, ", ") end
     })
 
     return stations
@@ -72,7 +72,7 @@ end
 ---@return Station
 local function read_this_station()
     local unformated_station = csv.read_file("src/data/individual_stations/station_" ..
-    tostring(os.computerID()) .. ".csv")[1]
+        tostring(os.computerID()) .. ".csv")[1]
 
     local station_info = format_station(unformated_station)
 
@@ -98,7 +98,7 @@ _G.get_stations = function()
     return stations
 end
 
-_G.get_station_ids = function ()
+_G.get_station_ids = function()
     local info = debug.getinfo(2, "Sl")
     LOGGER:info("Station ids accessed from " .. info.source:gsub("^@", "") .. ":" .. info.currentline)
 
@@ -111,7 +111,8 @@ end
 local session_key = "aVUD5IqcE6E27lVRlByso9tN1IQC3Sdn" --generate_session_key()
 
 local function async_main()
-    teleport.initiate(this_station.station_id, { destination = vector.new(0, 0, 0) }, false)
+    print(this_station.station_id)
+    teleport.initiate(this_station.station_id, { destination = vector.new(-260,64,260) }, false)
     print("Teleport done")
 end
 
