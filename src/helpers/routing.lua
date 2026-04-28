@@ -38,8 +38,9 @@ end
 ---Find the best route from the current position to the destination
 ---@param origin Station
 ---@param destination Station|ccTweaked.Vector
----@param stations Station[]
-function routing.find_route(origin, destination, stations)
+function routing.find_route(origin, destination)
+    local stations = get_stations()
+
     local route = {destination}
     if not destination.computer_id then
         LOGGER:info("Destination coordinates, finding closest station")
@@ -56,12 +57,16 @@ function routing.find_route(origin, destination, stations)
 
     local visited = {} --[[@type {[Station]: Station}]]
     local queue = {origin} --[[@type (Station[])]]
+
     local last_visited --[[@type Station]]
     local visiting --[[@type Station]]
-    -- PROBLEM visiting expects Station but queue stores station ids
+
     while true do
+        LOGGER:info("Loop start")
         visiting = queue[1]
         table.remove(queue, 1)
+        
+        LOGGER:info(visiting)
 
         if visiting == route[1] then
             if last_visited == nil then
@@ -71,14 +76,21 @@ function routing.find_route(origin, destination, stations)
                 last_visited = visited[last_visited]
             end
         else
-            LOGGER:info(textutils.serialise(queue))
-            LOGGER:info(textutils.serialise(visiting.neighbors))
-            table.move(visiting.neighbors, 1, #visiting.neighbors, #queue + 1, queue)
-            
+            for _, neighbor in ipairs(visiting.neighbors) do
+                local neighbor_station = stations[neighbor]
+                if visited[neighbor_station] == nil then table.insert(queue, neighbor_station) end
+            end
+
             visited[visiting] = last_visited
             last_visited = visiting
         end
+        LOGGER:info("Visited ", textutils.serialise(visited, {allow_repetitions = true}))
+        LOGGER:info("Visiting ", visiting)
+        LOGGER:info("Last visited ", last_visited)
+        LOGGER:info("Queue ", textutils.serialise(queue, {allow_repetitions = true}))
     end
+
+    LOGGER:info("Route: ", textutils.serialise(route))
 
     return route
 end

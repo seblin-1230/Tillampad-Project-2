@@ -61,6 +61,10 @@ local function read_stations()
         stations[station_info.station_id] = station_info
     end
 
+    setmetatable(stations, {
+        __tostring = function (stations) return table.concat(stations, ", ") end
+    })
+
     return stations
 end
 
@@ -97,7 +101,6 @@ end
 local session_key = "aVUD5IqcE6E27lVRlByso9tN1IQC3Sdn" --generate_session_key()
 
 local function async_main()
-    LOGGER:warning(textutils.serialise(get_this_station().neighbors))
     teleport.initiate(os.computerID(), { destination = vector.new(0, 0, 0) }, false)
     print("Teleport done")
 end
