@@ -1,5 +1,6 @@
 local utils = require("libs.utils")
 local sha256 = require("libs.encryption.sha256")
+local crypto = require("libs.encryption.crypto")
 
 local file_blacklist = {
     ["rom"] = true,
@@ -68,13 +69,15 @@ local function hash_blocks()
     return ""
 end
 
-function Hash_station(computer_id)
+function Hash_station(computer_id, station_id, nonce)
     LOGGER:info("Initiating station hashing")
     local file_hash = hash_files()
     local peripheral_hash = hash_peripherals()
     local block_hash = hash_blocks()
 
-    return sha256.hash(file_hash .. peripheral_hash .. block_hash .. tostring(computer_id))
+    if not nonce then nonce = crypto.random_bytes(12) end
+
+    return sha256.hash(file_hash .. peripheral_hash .. block_hash .. tostring(computer_id) .. tostring(station_id) .. nonce), nonce
 end
 
 return Hash_station
