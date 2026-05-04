@@ -115,7 +115,7 @@ end
 local function encrypt(plaintext, key, nonce, byte_offset)
     if byte_offset == nil then byte_offset = 0 end
     if nonce == nil then
-        local crypto = require("encryption.crypto")
+        local crypto = require("libs.encryption.crypto")
         nonce = crypto.random_bytes(12)
     end
 

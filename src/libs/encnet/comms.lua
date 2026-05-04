@@ -5,33 +5,73 @@ local chacha20 = require("libs.encryption.chacha20")
 
 local session_key
 
----Parse a comms payload into normal content
+local function serialise(obj)
+    local objType = type(obj)
+
+    local output
+
+    if objType == "number" then
+        output = tostring(obj)
+    end
+end
+
+---Parse an encrypted payload into its components
 ---@param payload string
+---@return number computer_id
+---@return string payload_type
+---@return table data
 local function parse_payload(payload)
+    print("Parsing")
     local nonce = payload:sub(1, 12)
     local payload_type = payload:sub(13, 20)
     local sender = payload:sub(21, 24):byte(1, 4)
-    local payload = payload:sub(25, #payload)
-    local decrypted = chacha20.crypt(payload, session_key, nonce)
 
-    return sender, payload_type, decrypted
+    local payload_data = chacha20.crypt(payload:sub(25, #payload), session_key, nonce)
+
+    local lengths = {}
+    local current_char = ""
+    local i = 1
+    LOGGER:info(table.concat({payload_data:byte(1, #payload_data)}, ","))
+    while current_char:byte() ~= 0 do
+        current_char = payload_data:sub(i)
+        LOGGER:info(current_char:byte())
+
+        lengths[i] = string.byte(current_char)
+        i = i + 1
+    end
+
+    local offset = 0
+    local data = {}
+    for j, length in ipairs(lengths) do
+        data[j] = payload_data:sub(i + offset, i + offset + length - 1)
+        offset = offset + length
+    end
+
+    return sender, payload_type, data
 end
 
-local function build_payload(payload_type, payload)
-    if #payload_type > 8 then
-        error("Type to long, max 8 chars")
+---Build a payload from data
+---@param payload_type string
+---@param ... nil|boolean|number|string The data
+---@return string
+local function build_payload(payload_type, ...)
+    if #payload_type ~= 8 then
+        error("Type not 8 character long")
     end
 
-    local tabled_payload = {}
-    if type(payload) ~= "table" then
-        if type(payload) == "function" then error("Can not send unserialiseable objects") end
+    local n = select("#", ...)
 
-        table.insert(tabled_payload, payload)
-    else
-        tabled_payload = payload
+    local str_table = {}
+    local length_table = {}
+    for i = 1, n do
+        str_table[i] = tostring(select(i, ...))
+        length_table[i] = string.char(#str_table[i])
     end
 
-    local encrypted_payload, nonce = chacha20.crypt(textutils.serialise(tabled_payload), session_key)
+    local payload_data = table.concat(length_table) .. "\00" .. table.concat(str_table)
+    print("Not encrypted payload data: ", payload_data)
+    
+    local encrypted_payload, nonce = chacha20.crypt(payload_data, session_key)
 
     local id = os.computerID()
     local id_string = string.char(bit32.extract(id, 0, 8), bit32.extract(id, 8, 8), bit32.extract(id, 16, 8), bit32.extract(id, 24, 8))
@@ -57,20 +97,21 @@ end
 ---Send a payload to a computer with "reciver" id,
 ---@param recipient integer What computer id to send the payload to
 ---@param payload_type string The type of the payload, at most 8 characters
----@param payload any The payload to encrypt and send
 ---@param protocol? string The protocol the send the payload on, can be nil
+---@param ... any The data to encrypt and send
 ---@return boolean success If the send succeded, NOT if the payload was recived
-function comms.send(recipient, payload_type, payload, protocol)
-    local built_payload = build_payload(payload_type, payload)
+function comms.send(recipient, payload_type, protocol, ...)
+    local built_payload = build_payload(payload_type, ...)
+    print("sending: ", built_payload)
     return rednet.send(recipient, built_payload, protocol)
 end
 
 ---Broadcast a payload to all computers along a specified protocol
 ---@param payload_type string The type of the payload, at most 8 characters
----@param payload any The payload to encrypt and broadcast
 ---@param protocol string The protocol to broadcast on
-function comms.broadcast(payload_type, payload, protocol)
-    local built_payload = build_payload(payload_type, payload)
+---@param ... any The data to encrypt and broadcast
+function comms.broadcast(payload_type, protocol, ...)
+    local built_payload = build_payload(payload_type, ...)
     rednet.broadcast(built_payload, protocol)
 end
 
@@ -79,17 +120,17 @@ end
 ---@param timeout? number How long to wait before timing out
 ---@return number? sender The id of the computer that sent the payload
 ---@return string? payload_type The payload type of the recived payload
----@return table? payload The decrypted recived payload
 ---@return string? protocol The protocol the payload was sent under
+---@return ... The decrypted recived data
 function comms.receive(protocol_filter, timeout)
+    print("Reciving")
     local sender, un_parsed_payload, protocol = rednet.receive(protocol_filter, timeout)
     if not sender then return nil end
 
-    local true_sender, payload_type, payload = parse_payload(un_parsed_payload --[[@as string]])
+    local true_sender, payload_type, data = parse_payload(un_parsed_payload --[[@as string]])
 
-    local un_serialised_payload = textutils.unserialise(payload)
 
-    return true_sender, payload_type, un_serialised_payload, protocol
+    return true_sender, payload_type, protocol, table.unpack(data)
 end
 
 ---Check if a modem is open, identical ti rednet.isOpen

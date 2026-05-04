@@ -192,4 +192,15 @@ function utils.recursive_file_list(root, blacklist)
     return files
 end
 
+---Convert a string to a boolean
+---@param str string
+---@return boolean
+function utils.string_to_bool(str)
+    if str == "true" then
+        return true
+    else
+        return false
+    end
+end
+
 return utils
