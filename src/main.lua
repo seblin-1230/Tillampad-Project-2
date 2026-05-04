@@ -111,12 +111,13 @@ end
 local session_key = "aVUD5IqcE6E27lVRlByso9tN1IQC3Sdn" --generate_session_key()
 
 local function async_main()
-    print(this_station.station_id)
-    teleport.initiate(this_station.station_id, { destination = vector.new(-260,64,260) }, false)
-    print("Teleport done")
+    if os.computerID() == 0 then
+        print(this_station.station_id)
+        teleport.initiate(this_station.station_id, { destination = vector.new(-260,64,260) }, false)
+        print("Teleport done")
+    end
 end
 
---TODO Figure out why computer 0 thinks its station_id is 0 and not 1
 parallel.waitForAll(
     function() Handle_communication(session_key) end,
     async_main

@@ -1,4 +1,3 @@
-local encnet = require("libs.encnet.comms")
 local new_station = require("main.new_station")
 local session_key = require("main.session_key")
 local teleport = require("main.teleport")
@@ -20,9 +19,10 @@ function Handle_communication(session_key)
     encnet.open("left", session_key)
 
     while true do
-        local sender, message_type, payload, protocol = assert(encnet.receive())
+        local sender, message_type, payload = assert(encnet.receive())
 
         LOGGER:info("Comm recived")
+        LOGGER:info(textutils.serialise(payload))
         local sucess = function_table[message_type](sender, payload, true)
 
         if not sucess then

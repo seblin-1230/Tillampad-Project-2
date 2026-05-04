@@ -61,6 +61,6 @@ else
     wait_for_master_disk()
 
     logger:new({station_id = read_this_station_id()})
-    _G.comms = require("libs.encnet.comms")
+    _G.encnet = require("libs.encnet.comms")
     -- shell.run("src/main.lua")
 end

@@ -40,9 +40,10 @@ end
 local function message_schedule(chunk)
     local schedule = {}
     for i = 1, #chunk, 4 do
+        print(chunk[i], bit32.lshift(chunk[i], 24), bit32.lshift(chunk[i+1], 16), bit32.lshift(chunk[i+2], 8), chunk[i+3])
         local word = bit32.bor(bit32.lshift(chunk[i], 24), bit32.lshift(chunk[i+1], 16), bit32.lshift(chunk[i+2], 8), chunk[i+3])
         table.insert(schedule, word)
-    end 
+    end
 
     for i = 17, 64 do
         local o0 = bit32.bxor(bit32.rrotate(schedule[i-15], 7), bit32.rrotate(schedule[i-15], 18), bit32.rshift(schedule[i-15], 3))
@@ -113,7 +114,7 @@ local function hash(message)
     }
     for i = 1, #message_block, 64 do
         local chunk = {table.unpack(message_block, i, i+63)}
-        
+
         hash_values = chunk_loop(chunk, hash_values)
 
         utils.yield(8, i)

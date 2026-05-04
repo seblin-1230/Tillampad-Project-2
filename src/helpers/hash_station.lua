@@ -21,10 +21,13 @@ local function hash_files()
     for _, path in ipairs(file_paths) do
         local l_path = path:gsub("%s+$", "")
         table.insert(tasks, function()
-            LOGGER:info("Attempting hashing of " .. l_path)
+            LOGGER:info("Hashing file \"" .. l_path .. "\"")
             local file = assert(fs.open(l_path, "r"))
             local message = assert(file.readAll())
             file.close()
+
+            if l_path == "src/main/teleport.lua" then LOGGER:info(message) end
+
             results[path] = sha256.hash(message)
             LOGGER:info("Hashed file \"" .. l_path .. "\" : " .. results[path])
         end)
