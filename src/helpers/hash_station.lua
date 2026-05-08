@@ -24,6 +24,7 @@ local function hash_files()
             LOGGER:info("Hashing file \"" .. l_path .. "\"")
             local file = assert(fs.open(l_path, "r"))
             local message = assert(file.readAll())
+            LOGGER:info(#message)
             file.close()
 
             if l_path == "src/main/teleport.lua" then LOGGER:info(message) end
