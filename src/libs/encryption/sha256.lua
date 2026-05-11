@@ -21,6 +21,10 @@ local function generate_message_block(message)
     table.insert(message_block, 0x80)
 
     local pad_by = (64 - #message_block % 64) - 8
+    if pad_by < 0 then
+        pad_by = pad_by + 64
+    end
+
     for i = 1, pad_by do
         table.insert(message_block, 0)
     end
@@ -38,17 +42,8 @@ end
 ---@param chunk any
 ---@return table
 local function message_schedule(chunk)
-    print("New message schedule")
     local schedule = {}
     for i = 1, #chunk, 4 do
-        print(i, #chunk)
-        local test1 = bit32.lshift(chunk[i], 24)
-        local test2 = bit32.lshift(chunk[i+1], 16)
-        local test3 = bit32.lshift(chunk[i+2], 8)
-        local test4 = chunk[i+3]
-
-        print(test1, test2, test3, test4, chunk[i], chunk[i+1], chunk[i+2], chunk[i+3], i)
-
         local word = bit32.bor(bit32.lshift(chunk[i], 24), bit32.lshift(chunk[i+1], 16), bit32.lshift(chunk[i+2], 8), chunk[i+3])
         table.insert(schedule, word)
     end
@@ -108,9 +103,8 @@ end
 ---@param message string
 ---@return string
 local function hash(message)
-    LOGGER:info("New hashing", #message)
     local message_block = generate_message_block(message)
-    
+
     local hash_values = {
         0x6a09e667,
         0xbb67ae85,
