@@ -18,7 +18,6 @@ local function parse_payload(payload)
 
     local payload_data = chacha20.crypt(payload:sub(25, #payload), session_key, nonce)
 
-    LOGGER:info(payload_data)
 
     local lengths = {}
     local current_char = ""
@@ -45,6 +44,7 @@ end
 ---@param ... nil|boolean|number|string The data
 ---@return string
 local function build_payload(payload_type, ...)
+    LOGGER:info("Building payload with type " .. payload_type)
     if #payload_type ~= 8 then
         error("Type not 8 character long")
     end
@@ -57,8 +57,6 @@ local function build_payload(payload_type, ...)
         str_table[i] = tostring(select(i, ...))
         length_table[i] = string.char(#str_table[i])
     end
-    LOGGER:info(textutils.serialise(str_table))
-    LOGGER:info(textutils.serialise(length_table))
     local payload_data = table.concat(length_table) .. "\00" .. table.concat(str_table)
 
     local encrypted_payload, nonce = chacha20.crypt(payload_data, session_key)

@@ -112,8 +112,7 @@ local session_key = "aVUD5IqcE6E27lVRlByso9tN1IQC3Sdn" --generate_session_key()
 
 local function async_main()
     if os.computerID() == 0 then
-        print(this_station.station_id)
-        teleport.initiate(this_station.station_id, { destination = vector.new(-260,64,260) }, false)
+        teleport.initiate(this_station.computer_id, { destination = vector.new(-260,64,260) }, false)
         print("Teleport done")
     end
 end

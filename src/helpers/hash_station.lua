@@ -24,10 +24,7 @@ local function hash_files()
             LOGGER:info("Hashing file \"" .. l_path .. "\"")
             local file = assert(fs.open(l_path, "r"))
             local message = assert(file.readAll())
-            LOGGER:info(#message)
             file.close()
-
-            if l_path == "src/main/teleport.lua" then LOGGER:info(message) end
 
             results[path] = sha256.hash(message)
             LOGGER:info("Hashed file \"" .. l_path .. "\" : " .. results[path])
@@ -73,7 +70,7 @@ local function hash_blocks()
     return ""
 end
 
-function Hash_station(computer_id, station_id, nonce)
+function Hash_station(computer_id, nonce)
     LOGGER:info("Initiating station hashing")
     local file_hash = hash_files()
     local peripheral_hash = hash_peripherals()
@@ -81,7 +78,7 @@ function Hash_station(computer_id, station_id, nonce)
 
     if not nonce then nonce = crypto.random_bytes(12) end
 
-    return sha256.hash(file_hash .. peripheral_hash .. block_hash .. tostring(computer_id) .. tostring(station_id) .. nonce), nonce
+    return sha256.hash(file_hash .. peripheral_hash .. block_hash .. tostring(computer_id) .. nonce), nonce
 end
 
 return Hash_station
