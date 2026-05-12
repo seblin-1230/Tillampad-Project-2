@@ -21,15 +21,10 @@ function Handle_communication(session_key)
     while true do
         local sender, message_type, payload = assert(encnet.receive())
 
-        LOGGER:info("Comm recived")
-        LOGGER:info(textutils.serialise(payload))
+        LOGGER:info("Comm recived; Type: " .. message_type)
         local sucess = function_table[message_type](sender, payload, true)
 
         if not sucess then
-            term.setTextColor(colors.red)
-            print("Invalid comm recived")
-            term.setTextColor(colors.white)
-
             LOGGER:error(string.format("Invalid comm; sender: %d; message type: %s; payload: %s", sender, message_type, textutils.serialise(payload)))
         end
     end

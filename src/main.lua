@@ -11,6 +11,8 @@ local Handle_communication = require("main.communication")
 local modem                = peripheral.find("modem")
 
 
+local in_teleport = false
+
 
 local function generate_session_key()
     local key_count = settings.get("station.key_count")

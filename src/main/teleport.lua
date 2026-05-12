@@ -51,7 +51,7 @@ function teleport.initiate(sender, payload, external)
             return true
         end
 
-        teleport.verification(os.computerID(), {hash_nonce}, false)
+        teleport.verification(sender, {hash_nonce}, false)
 
         return true
     else

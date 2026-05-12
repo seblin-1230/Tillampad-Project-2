@@ -91,6 +91,7 @@ end
 ---@return boolean success If the send succeded, NOT if the payload was recived
 function comms.send(recipient, payload_type, ...)
     local built_payload = build_payload(payload_type, ...)
+    LOGGER:info("Sending comm to " .. tostring(recipient) .. "; Type: " .. payload_type)
     return rednet.send(recipient, built_payload, protocol)
 end
 
@@ -99,6 +100,7 @@ end
 ---@param ... any The data to encrypt and broadcast
 function comms.broadcast(payload_type, ...)
     local built_payload = build_payload(payload_type, ...)
+    LOGGER:info("Broadcasting comm; Type: " .. payload_type)
     rednet.broadcast(built_payload, protocol)
 end
 
