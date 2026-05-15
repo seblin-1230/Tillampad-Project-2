@@ -7,12 +7,8 @@ local function log_path(station_id)
     local time = os.date("%F")
     local base = "/logs/TeleNet-" .. tostring(station_id) .. "-" .. time .. "-"
 
-    for i = 1, 100 do
-        local path = base .. tostring(i) .. ".log"
-        if not fs.exists(path) then
-            return path
-        end
-    end
+    local files = fs.list("/logs")
+    return base .. tostring(#files + 1) .. ".log"
 end
 
 local function format(...)
