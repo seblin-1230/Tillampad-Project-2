@@ -1,14 +1,18 @@
 local routing = require("helpers.routing")
+local comms   = require("main.communication")
 
 local Hash_station = require("helpers.hash_station")
 
 local teleport = {}
 
+local function show_wait_message()
+    
+end
+
 local function do_teleport(sender)
     print("Teleported to " .. tostring(_G.destination))
     LOGGER:info("Teleported to " .. tostring(_G.destination))
 
-    
     if sender ~= os.computerID() then 
         LOGGER:info("Sending route: " .. textutils.serialise(_G.route, { compact = true }) ..
         " length: " .. tostring(#_G.route))
@@ -16,6 +20,16 @@ local function do_teleport(sender)
     end
     _G.destination = nil
     _G.route = nil
+
+    in_teleport = false
+    local next_in_queue = table.remove(teleport_queue, 1)
+    if next_in_queue ~= nil then
+        encnet.send(next_in_queue, "TeleQueu")
+        return
+    elseif attempting_teleport_payload ~= nil then
+        teleport.initiate(os.computerID(), attempting_teleport_payload, false)
+        attempting_teleport_payload = nil
+    end
 end
 
 local function teleport_continue()
@@ -49,6 +63,16 @@ end
 ---@return string? error
 function teleport.initiate(sender, payload, external)
     if external then
+        if in_teleport then
+            LOGGER:info("Teleport request while busy adding to queue")
+            encnet.send(sender, "TeleWait")
+            table.insert(teleport_queue, sender)
+            LOGGER:info("Queue: " .. textutils.serialise(teleport_queue, {compact=true}))
+            return true
+        end
+
+        in_teleport = true
+
         LOGGER:info("Initiating teleport with: " .. tostring(sender))
         local hash_other_other = payload[1]
         local hash_nonce = payload[2]
@@ -63,9 +87,17 @@ function teleport.initiate(sender, payload, external)
         end
 
         teleport.verification(sender, { hash_nonce }, false)
-
-        return true
     else
+        if in_teleport then
+            LOGGER:warning("User attempt teleport, busy forcing wait")
+            term.setTextColor(colors.yellow)
+            print(string.format("%d people trying to transfer through this station please wait", #teleport_queue))
+            term.setTextColor(colors.lime)
+
+            attempting_teleport_payload = payload
+        end
+        in_teleport = true
+
         LOGGER:info("Initiating teleport from " ..
         tostring(get_this_station()) .. " to " .. tostring(payload.destination))
         _G.route = routing.find_route(get_this_station(), payload.destination)
@@ -86,9 +118,9 @@ function teleport.initiate(sender, payload, external)
         LOGGER:info("Sending teleport request to: " .. tostring(get_stations()[_G.destination]))
         LOGGER:info("With hash: " .. hash_this_this .. ", " .. nonce)
         encnet.send(_G.destination, "TeleInit", hash_this_this, nonce)
-
-        return true
     end
+
+    return true
 end
 
 ---Verify the station being teleported to
@@ -113,15 +145,14 @@ function teleport.verification(sender, payload, external)
 
         LOGGER:info("Station " .. tostring(sender) .. " safe, teleporting")
         do_teleport(sender)
-
-        return true
     else
         LOGGER:info("Start verifing station " .. tostring(sender))
         local hash_nonce = payload[1]
         local hash_this_this = Hash_station(os.computerID(), hash_nonce)
         encnet.send(sender, "TeleVeri", hash_this_this, hash_nonce)
-        return true
     end
+
+    return true
 end
 
 function teleport.denied(sender, payload, external)
@@ -164,16 +195,46 @@ function teleport.done(sender, payload, external)
             end
         end
 
+        if payload[1] == "" then
+            term.setTextColor(colors.lime)
+            print("This is your final destination, please exit the chamber")
+            term.setTextColor(colors.white)
+            in_teleport = false
+            return true
+        end
+
         LOGGER:info("Rebuilt route: " .. textutils.serialise(_G.route, { compact = true }))
 
         teleport_continue()
-
-        return true
     else
         local source = debug.getinfo(2, "Sl").source:gsub("^@", "")
-        LOGGER:error("Teleport done called from " + source)
-        return true
+        LOGGER:error("Teleport done called internaly from " + source)
     end
+    return true
+end
+
+function teleport.wait(sender, payload, external)
+    if external then
+        LOGGER:warning(string.format("%s is busy, waiting for queue event", get_stations()[sender]))
+        
+        term.setTextColor(colors.yellow)
+        print("Next station busy, wait a moment")
+        term.setTextColor(colors.white)
+    else
+        local source = debug.getinfo(2, "Sl").source:gsub("^@", "")
+        LOGGER:error("Teleport done called internaly from " + source)
+    end
+    return true
+end
+
+function teleport.queue(sender, payload, external)
+    if external then
+        LOGGER:info(string.format("%s is now free, starting teleport sequence", get_stations()[sender]))
+        print("Next station free, teleporting")
+        table.insert(_G.route, _G.destination)
+        teleport_continue()
+    end
+    return true
 end
 
 return teleport

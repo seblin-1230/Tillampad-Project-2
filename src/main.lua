@@ -1,18 +1,14 @@
 ---@alias Station {computer_id: integer, station_id: integer, position: ccTweaked.Vector, name: string, description: stringlib, neighbors: integer[], unsafe: boolean}
 
-local sha256               = require("libs.encryption.sha256")
-local crypto               = require("libs.encryption.crypto")
-local utils                = require("libs.utils")
-local csv                  = require("libs.csv")
-local teleport             = require("main.teleport")
+local sha256        = require("libs.encryption.sha256")
+local crypto        = require("libs.encryption.crypto")
+local utils         = require("libs.utils")
+local csv           = require("libs.csv")
+local teleport      = require("main.teleport")
 
-local Handle_communication = require("main.communication")
+local communication = require("main.communication")
 
-local modem                = peripheral.find("modem")
-
-
-local in_teleport = false
-
+local modem         = peripheral.find("modem")
 
 local function generate_session_key()
     local key_count = settings.get("station.key_count")
@@ -110,16 +106,32 @@ _G.get_station_ids = function()
     end
 end
 
+_G.teleport_queue = {}
+_G.in_teleport = false
+_G.attempting_teleport_payload = nil
+_G.route = {}
+
 local session_key = "aVUD5IqcE6E27lVRlByso9tN1IQC3Sdn" --generate_session_key()
 
 local function async_main()
-    if os.computerID() == 0 then
-        teleport.initiate(this_station.computer_id, { destination = vector.new(-260,64,260) }, false)
-        print("Teleport done")
+    while true do
+        local event, key, is_held = os.pullEvent("key")
+        if key == keys.f1 and not is_held then
+            if os.computerID() == 0 then
+                print("Trying to teleport to -260, 64, 260")
+                teleport.initiate(this_station.computer_id, { destination = vector.new(-260, 64, 260) }, false)
+            elseif os.computerID() == 1 then
+                print("Trying to teleport to station 0")
+                teleport.initiate(this_station.computer_id, { destination = stations[0] }, false)
+            elseif os.computerID() == 2 then
+                print("Trying to teleport to station 3")
+                teleport.initiate(this_station.computer_id, { destination = stations[3] }, false)
+            end
+        end
     end
 end
 
 parallel.waitForAll(
-    function() Handle_communication(session_key) end,
+    function() communication.Handle_communication(session_key) end,
     async_main
 )
