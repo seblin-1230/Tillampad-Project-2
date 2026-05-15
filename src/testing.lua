@@ -1,20 +1,11 @@
-local communication = require("main.communication")
+local pbkdf2 = require("libs.encryption.pbkdf2")
 
-local sha256 = require("libs.encryption.sha256")
-local logger = require("main.logger")
-local encnet = require("libs.encnet.comms")
-local utils  = require("libs.utils")
+local identity_file = fs.open("/src/identity.txt", "rb")
+local identity_data = identity_file.readAll()
+identity_file.close()
 
+local hashed = pbkdf2.derive(identity_data, "j8OtehrzI6Iw7jNVJPtgjBUBefMJv38Y", 10000, "Progress: ")
 
-local session_key = "aVUD5IqcE6E27lVRlByso9tN1IQC3Sdn"
-encnet.open("left", session_key)
-
-if os.computerID() == 0 then
-    encnet.send(1, "JustTemp", nil, "Hello", false, 100)
-else
-    local sender, payload_type, _, str, bool, num = encnet.receive()
-    local true_bool = utils.string_to_bool(bool)
-    
-    print(str, bool, num)
-    sleep(10)
-end
+local hashed_file = fs.open("/hashed_identity.txt", "w")
+hashed_file.writeLine(hashed)
+hashed_file.close()
