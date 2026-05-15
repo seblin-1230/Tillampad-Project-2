@@ -83,20 +83,19 @@ function routing.find_route(source, destination)
 
         LOGGER:info("Closest station " .. tostring(closest_station) .. " at " .. tostring(closest_station.position))
         table.insert(route, destination)
-        table.insert(route, closest_station.station_id)
+        table.insert(route, closest_station.computer_id)
     else
-        table.insert(route, destination.station_id)
+        table.insert(route, destination.computer_id)
     end
 
     local graph = routing.generate_adjacent()
-    local V = #graph
-    local src, des = source.station_id, route[#route]
+    local src, des = source.computer_id, route[#route]
 
     local par = {}
     local dist = {}
-    for i = 1, V do
-        par[i] = -1
-        dist[i] = math.huge
+    for id, station_info in pairs(stations) do
+        par[id] = -1
+        dist[id] = math.huge
     end
 
     bfs(graph, src, par, dist)

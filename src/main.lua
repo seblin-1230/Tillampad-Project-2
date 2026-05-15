@@ -57,10 +57,10 @@ local function read_stations()
         local station_info = format_station(unformated_station)
 
         setmetatable(station_info, {
-            __tostring = function(s) return "Station<" .. s.station_id .. ">" end
+            __tostring = function(s) return "Station<" .. s.station_id .. "," .. s.computer_id .. ">" end
         })
 
-        stations[station_info.station_id] = station_info
+        stations[station_info.computer_id] = station_info
     end
 
     setmetatable(stations, {
@@ -79,7 +79,7 @@ local function read_this_station()
     local station_info = format_station(unformated_station)
 
     setmetatable(station_info, {
-        __tostring = function(s) return "Station<" .. s.station_id .. ">" end
+        __tostring = function(s) return "Station<" .. s.station_id .. "," .. s.computer_id .. ">" end
     })
 
     return station_info
