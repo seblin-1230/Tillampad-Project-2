@@ -5,4 +5,5 @@ if os.computerID() ~= 3 then
 end
 
 settings.set("computer_id", os.computerID())
+settings.save()
 shell.run("src/startup.lua")
