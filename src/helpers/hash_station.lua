@@ -6,6 +6,8 @@ local file_blacklist = {
     ["rom"] = true,
     ["data"] = true,
     ["main.lua"] = true,
+    [".settings"] = true,
+    [".cash_history"] = true
 }
 
 
@@ -60,7 +62,7 @@ local function hash_peripherals()
     end
 
     local peripheral_hash = sha256.hash(table.concat(peripheral_types))
-    LOGGER:info("Peripherals hashed")
+    LOGGER:info("Peripherals hashed: " .. peripheral_hash)
 
     return peripheral_hash
 end
