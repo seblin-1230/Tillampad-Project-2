@@ -42,6 +42,7 @@ local function wait_for_master_disk()
     ::testing_skip::
 end
 
+
 ---Get the data for this station
 ---@return number
 local function read_this_station_id()
@@ -62,5 +63,10 @@ else
 
     logger:new({station_id = read_this_station_id()})
     _G.encnet = require("libs.encnet.comms")
+    
+    local mt = getmetatable(vector.new(0, 0, 0))
+    mt.__tostring = function (self)
+        return ("v%s,%s,%s"):format(self.x, self.y, self.z)
+    end
     -- shell.run("src/main.lua")
 end
