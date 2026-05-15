@@ -38,7 +38,7 @@ echo "Opening logs:"
 printf '  %s\n' "${LOGS[@]}"
 echo
 
-multitail -M 10000 -s 2 \
+multitail -s 2 \
     -ci "${COLORS[0]}" "${LOGS[0]}" \
     -ci "${COLORS[1]}" "${LOGS[1]}" \
     -ci "${COLORS[2]}" "${LOGS[2]}" \
