@@ -131,6 +131,9 @@ local function async_main()
     end
 end
 
+local secret_file = fs.open("disk/secret.txt", "r")
+local master_secret = secret_file.readAll()
+secret_file.close()
 parallel.waitForAll(
     function() communication.Handle_communication(session_key) end,
     async_main
