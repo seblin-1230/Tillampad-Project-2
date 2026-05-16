@@ -3,8 +3,7 @@ local pbkdf2 = require("libs.encryption.pbkdf2")
 local verify = {}
 
 local master_disk_ids = {
-    [1] = true,
-    [4] = true
+    [2] = true,
 }
 
 function verify.master_disk(drive_name, salt)
@@ -23,15 +22,15 @@ function verify.master_disk(drive_name, salt)
     identity_file.close()
 
     local verification_file = assert(fs.open("rom/hashes/master_disk_identity.hash", "r"))
-    local verification_hash = verification_file.readAll()
+    local verification_hash = verification_file.readAll():sub(1, 32)
     verification_file.close()
 
-    local salt_file = fs.open("rom/hashes/salt.txt", "r")
-    local salt = salt_file.readLine()
-    salt_file.close()
+    local salt = "j8OtehrzI6Iw7jNVJPtgjBUBefMJv38Y"
 
-    local identity_hash = pbkdf2.derive(identity, salt, 20000, "Deriving identity: ")
+    local identity_hash = pbkdf2.derive(identity, salt, 10000, "Deriving identity: ")
     if identity_hash ~= verification_hash then
+        print(identity_hash, #identity_hash)
+        print(verification_hash, #verification_hash)
         return false, "Failed hash"
     end
 
