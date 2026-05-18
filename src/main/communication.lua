@@ -1,38 +1,48 @@
-local function handle_communication(session_key)
+local function handle_communication(master_key)
     local new_station = require("main.new_station")
-    local session_key_module = require("main.session_key")
+    local session_key_module = require("main.session_key_module")
     local teleport = require("main.teleport")
 
     local function_table = {
-    TeleInit = teleport.initiate,
-    TeleVeri = teleport.verification,
-    TeleDeni = teleport.denied,
-    TeleDone = teleport.done,
-    TeleWait = teleport.wait,
-    TeleQueu = teleport.queue,
-    SeKeyReq = session_key_module.request,
-    SeKeyRes = session_key_module.response,
-    ClearMas = session_key_module.clear_master,
-    NewStati = new_station.new_station,
-    NewSVeri = new_station.verification,
-    NewNeigh = new_station.new_neighbour,
-}
+        TeleInit = teleport.initiate,
+        TeleVeri = teleport.verification,
+        TeleDeni = teleport.denied,
+        TeleDone = teleport.done,
+        TeleWait = teleport.wait,
+        TeleQueu = teleport.queue,
+        SeKeyReq = session_key_module.request,
+        SeKeyRes = session_key_module.response,
+        ClearMas = session_key_module.clear_master,
+        NewStati = new_station.new_station,
+        NewSVeri = new_station.verification,
+        NewNeigh = new_station.new_neighbour,
+    }
 
-    encnet.open("left", session_key)
+    encnet.open("left", master_key)
 
     while true do
         local sender, message_type, payload = assert(encnet.receive())
+
+        if not ready and not (message_type == "SeKeyReq" or message_type == "SeKeyRes" or message_type == "ClearMas") then
+            
+        end
 
         LOGGER:info("Comm recived; Type: " .. message_type)
         os.queueEvent(message_type, sender, payload)
         local sucess = function_table[message_type](sender, payload, true)
 
-        
+
         if not sucess then
             LOGGER:error(string.format("Invalid comm; sender: %d; message type: %s; payload: %s", sender, message_type,
-            textutils.serialise(payload)))
+                textutils.serialise(payload)))
         end
+
+        ::continue::
     end
+end
+
+local function ready(session_key)
+    
 end
 
 local function wait_for(payload_type, sender, timeout)

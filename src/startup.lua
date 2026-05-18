@@ -1,4 +1,4 @@
-local verify = require("verify")
+local verify = require("helpers.verify")
 local csv    = require("libs.csv")
 local logger = require("main.logger")
 local utils  = require("libs.utils")
@@ -29,7 +29,7 @@ local function wait_for_master_disk()
     print("This station is waiting for an admin to insert the master disk")
     term.setTextColor(colors.red)
 
-    goto testing_skip
+    goto skip
     repeat
         local event, side = os.pullEvent("disk")
 
@@ -39,7 +39,8 @@ local function wait_for_master_disk()
             print(reason)
         end
     until passed
-    ::testing_skip::
+
+    ::skip::
 end
 
 
@@ -61,6 +62,20 @@ else
 
     wait_for_master_disk()
 
+    -- Potential vonerability
+    -- Since the master disk verification is run before the station verification
+    -- An attacker could modify the staition to send the master disk identity to another computer
+    -- Before the station has been verified
+    -- Solutions:
+    -- Have a physical protocol to change master identity when this happens
+    local id = shell.openTab("shell")
+    print("Press f1 to continue, press f2 to interupt")
+
+    local event, key, is_held = os.pullEvent("key")
+    
+    shell.switchTab(id)
+    shell.exit()
+
     logger:new({station_id = read_this_station_id()})
     _G.encnet = require("libs.encnet.comms")
     
@@ -68,5 +83,6 @@ else
     mt.__tostring = function (self)
         return ("v%s,%s,%s"):format(self.x, self.y, self.z)
     end
-    -- shell.run("src/main.lua")
+
+    shell.run("src/main.lua")
 end

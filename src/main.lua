@@ -1,10 +1,11 @@
 ---@alias Station {computer_id: integer, station_id: integer, position: ccTweaked.Vector, name: string, description: stringlib, neighbors: integer[], unsafe: boolean}
 
-local sha256        = require("libs.encryption.sha256")
-local crypto        = require("libs.encryption.crypto")
-local utils         = require("libs.utils")
-local csv           = require("libs.csv")
-local teleport      = require("main.teleport")
+local sha256             = require("libs.encryption.sha256")
+local crypto             = require("libs.encryption.crypto")
+local utils              = require("libs.utils")
+local csv                = require("libs.csv")
+local teleport           = require("main.teleport")
+local session_key_module = require("main.session_key_module")
 
 local communication = require("main.communication")
 
@@ -81,8 +82,11 @@ local function read_this_station()
     return station_info
 end
 
+
+
 local this_station = read_this_station()
 local stations = read_stations()
+local session_key
 
 _G.get_this_station = function()
     local info = debug.getinfo(2, "Sl")
@@ -102,16 +106,24 @@ _G.get_station_ids = function()
 
     local ids = {}
     for i, station in pairs(stations) do
-        ids[i] = station.station_id
+        ids[station.station_id] = true
+    end
+
+    return ids
+end
+
+_G.set_session_key = function (fn_session_key)
+    if session_key == nil then
+        session_key = fn_session_key
     end
 end
+
 
 _G.teleport_queue = {}
 _G.in_teleport = false
 _G.attempting_teleport_payload = nil
 _G.route = {}
-
-local session_key = "aVUD5IqcE6E27lVRlByso9tN1IQC3Sdn" --generate_session_key()
+_G.ready = false
 
 local function async_main()
     while true do
@@ -131,9 +143,48 @@ local function async_main()
     end
 end
 
-local secret_file = fs.open("disk/secret.txt", "r")
-local master_secret = secret_file.readAll()
-secret_file.close()
+-- On startup
+term.clear()
+term.setCursorPos(1, 1)
+
+-- Step 1
+local last_station
+local y = 1
+while true do
+    term.setCursorPos(1, y)
+    term.clearLine()
+    term.setTextColor(colors.white)
+
+    write("Last station? > ")
+    local response = read()
+    
+    if response == "" or get_station_ids()[tonumber(response)] ~= nil then
+        break
+    else
+        term.setCursorPos(1, 1)
+        term.clearLine()
+
+        printError("Not a valid station id")
+        y = 2
+    end
+end
+
+
+-- Step 2
+local key_file = fs.open("disk/secret.txt", "r")
+local master_key = key_file.readAll()
+key_file.close()
+
+if last_station == nil then
+    session_key = generate_session_key()
+else
+    session_key_module.request()
+    print("Waiting for session key")
+end
+
+encnet.close(peripheral.getName(modem))
+encnet.open(peripheral.getName(modem), session_key)
+
 parallel.waitForAll(
     function() communication.Handle_communication(session_key) end,
     async_main
