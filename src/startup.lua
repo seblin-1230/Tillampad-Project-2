@@ -29,18 +29,16 @@ local function wait_for_master_disk()
     print("This station is waiting for an admin to insert the master disk")
     term.setTextColor(colors.red)
 
-    goto skip
     repeat
         local event, side = os.pullEvent("disk")
-
-        local passed, reason = verify.master_disk(side)
+        
+        local passed = true
+        --local passed, reason = verify.master_disk(side)
 
         if not passed then
             print(reason)
         end
     until passed
-
-    ::skip::
 end
 
 
@@ -77,6 +75,7 @@ else
     shell.exit()
 
     logger:new({station_id = read_this_station_id()})
+    LOGGER:info("Test")
     _G.encnet = require("libs.encnet.comms")
     
     local mt = getmetatable(vector.new(0, 0, 0))

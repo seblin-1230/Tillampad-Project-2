@@ -9,7 +9,7 @@ local protocol
 ---Parse an encrypted payload into its components
 ---@param payload string
 ---@return number computer_id
----@return string payload_type
+---@return PayloadType payload_type
 ---@return table data
 local function parse_payload(payload)
     local nonce = payload:sub(1, 12)
@@ -40,7 +40,7 @@ local function parse_payload(payload)
 end
 
 ---Build a payload from data
----@param payload_type string
+---@param payload_type PayloadType
 ---@param ... nil|boolean|number|string The data
 ---@return string
 local function build_payload(payload_type, ...)
@@ -71,6 +71,7 @@ end
 ---@param modem string
 ---@param new_session_key string
 function comms.open(modem, new_session_key, new_protocol)
+    LOGGER:info("Opening encnet with key: " .. new_session_key)
     rednet.open(modem)
     session_key = new_session_key
     protocol = new_protocol
@@ -86,7 +87,7 @@ end
 
 ---Send a payload to a computer with "reciver" id,
 ---@param recipient integer What computer id to send the payload to
----@param payload_type string The type of the payload, at most 8 characters
+---@param payload_type PayloadType The type of the payload, at most 8 characters
 ---@param ... any The data to encrypt and send
 ---@return boolean success If the send succeded, NOT if the payload was recived
 function comms.send(recipient, payload_type, ...)
@@ -96,7 +97,7 @@ function comms.send(recipient, payload_type, ...)
 end
 
 ---Broadcast a payload to all computers in the telenet
----@param payload_type string The type of the payload, at most 8 characters
+---@param payload_type PayloadType The type of the payload, at most 8 characters
 ---@param ... any The data to encrypt and broadcast
 function comms.broadcast(payload_type, ...)
     local built_payload = build_payload(payload_type, ...)
@@ -107,14 +108,15 @@ end
 ---Revice a sent payload either from comms.send or comms.broadcast
 ---@param timeout? number How long to wait before timing out
 ---@return number? sender The id of the computer that sent the payload
----@return string? payload_type The payload type of the recived payload
+---@return PayloadType? payload_type The payload type of the recived payload
 ---@return tablelib? data The decrypted recived data
 function comms.receive(timeout)
+    LOGGER:info("Listening for comms")
     local sender, un_parsed_payload = rednet.receive(protocol, timeout)
     if not sender then return nil end
 
     local true_sender, payload_type, data = parse_payload(un_parsed_payload --[[@as string]])
-
+    LOGGER:info("Comm recived " .. payload_type)
     return true_sender, payload_type, data
 end
 

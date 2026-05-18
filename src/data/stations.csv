@@ -1,4 +1,15 @@
-1,0,256,64,-256,Station 1,The first Station,1:2
-2,1,256,64,256,Station 2,The second Station,0:2:3
-3,2,-256,64,-256,Station 3,The third Station,0:1
-4,3,-256,64,256,Station 4, The forth Station,1
+100,0,0,64,0,Central Hub,Main transport hub,1:2:4,1
+101,1,256,64,0,East Junction,Eastern interchange station,0:3:5,2
+102,2,-256,64,0,West Junction,Western interchange station,0:6:7,3
+103,3,512,64,0,Far East Station,Remote eastern station,1:8,4
+104,4,0,64,256,North Hub,Northern central station,0:5:6:9,5
+105,5,256,64,256,Northeast Station,Northeastern branch station,1:4:10,6
+106,6,-256,64,256,Northwest Station,Northwestern branch station,2:4:11,7
+107,7,-512,64,0,Far West Station,Remote western station,2:12,8
+108,8,768,64,0,Outer East Terminal,Outer eastern terminal,3:13,9
+109,9,0,64,512,North Terminal,Northern terminal station,4:10:11,10
+110,10,256,64,512,Northeast Terminal,Terminal in the northeast,5:9:14,11
+111,11,-256,64,512,Northwest Terminal,Terminal in the northwest,6:9,12
+112,12,-768,64,0,Outer West Terminal,Outer western terminal,7,13
+113,13,1024,64,0,Extreme East Station,Furthest eastern outpost,8,14
+114,14,256,64,768,High North Station,High altitude northern station,10,-1

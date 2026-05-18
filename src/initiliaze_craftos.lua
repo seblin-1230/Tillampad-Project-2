@@ -6,6 +6,8 @@ local drive = peripheral.wrap("right")
 periphemu.create(tostring(os.computerID() + 1), "computer")
 
 settings.set("computer_id", os.computerID())
+settings.set("station.key_count", 0)
+settings.set("crypto.use_random_org", true)
 settings.save()
 
 parallel.waitForAll(
