@@ -55,13 +55,14 @@ local function hash_peripherals()
     --LOGGER:info("Initiating peripheral hashing")
 
     local peripheral_names = peripheral.getNames()
-    
+
     local peripheral_types = {}
     for i, name in ipairs(peripheral_names) do
         peripheral_types[i] = peripheral.getType(name)
     end
+    table.sort(peripheral_types)
 
-    local peripheral_hash = sha256.hash(table.concat(peripheral_types))
+    local peripheral_hash = sha256.hash(table.concat(peripheral_types, "|"))
     --LOGGER:info("Peripherals hashed: " .. peripheral_hash)
 
     return peripheral_hash

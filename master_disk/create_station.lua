@@ -4,6 +4,9 @@ for _, file in ipairs(fs.list("disk/station_files/")) do
     fs.copy(fs.combine("disk/station_files", file), fs.combine("/", file))
 end
 
+local position = vector.new(gps.locate(5, true)):sub(vector.new(-1, 0, 0))
+print("Position: " .. tostring(position))
+
 local routing = require("helpers.routing")
 local csv = require("libs.csv")
 
@@ -28,6 +31,8 @@ _G.encnet = require("libs.encnet.comms")
 local key_file = fs.open("disk/current_key.txt", "r")
 local session_key = key_file.readAll()
 key_file.close()
+
+print(session_key)
 
 encnet.open("left", session_key)
 
@@ -66,9 +71,6 @@ local desc = get_response("str")
 print("\nAnother stations computer id?")
 local other_id = get_response("num")
 
-local position = vector.new(gps.locate(10000, true))
-
-
 encnet.send(other_id, "OtheStat", true)
 
 print("Wating for other station list")
@@ -97,8 +99,10 @@ local stations = textutils.unserialise(data[1])
 local neighbors = {}
 
 for computer_id, station_info in pairs(stations) do
-    if routing.get_distance(station_info.position, position) < 10000 then
-        table.insert(neighbors, computer_id)
+    local pos = vector.new(station_info.position.x, station_info.position.y, station_info.position.z)
+    print(routing.get_distance(pos, position))
+    if routing.get_distance(pos, position) < 10000 and computer_id ~= os.computerID() then
+        table.insert(neighbors, tonumber(computer_id))
     end
 end
 
@@ -113,7 +117,18 @@ local this_station = {
     next_station = -1
 }
 
-encnet.broadcast("NewStati", textutils.serialise(this_station, {allow_repetitions=true}))
+stations[this_station.computer_id] = this_station
+
+encnet.broadcast("NewStati", 
+    station_id, 
+    os.computerID(),
+    position.x,
+    position.y,
+    position.z,
+    name, 
+    desc, 
+    table.concat(neighbors, ":"), 
+    -1)
 
 fs.open("data/individual_stations/station_" .. os.computerID() .. ".csv", "w").close()
 csv.append_file("data/individual_stations/station_" .. os.computerID() .. ".csv", 
@@ -129,6 +144,8 @@ csv.append_file("data/individual_stations/station_" .. os.computerID() .. ".csv"
         this_station.next_station
     }
 )
+
+print(textutils.serialise(stations))
 
 fs.open("data/stations.csv", "w").close()
 for _, station_info in pairs(stations) do
@@ -148,4 +165,9 @@ end
 
 sleep(2)
 
-shell.run("main.lua", "1")
+settings.set("computer_id", os.computerID())
+settings.set("station.key_count", 0)
+settings.set("crypto.use_random_org", true)
+settings.save()
+
+shell.run("main.lua", session_key)

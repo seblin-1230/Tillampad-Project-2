@@ -42,7 +42,9 @@ for i, name in ipairs(peripheral_names) do
     peripheral_types[i] = peripheral.getType(name)
 end
 
-local peripheral_hash = sha256.hash(table.concat(peripheral_types))
+table.sort(peripheral_types)
+
+local peripheral_hash = sha256.hash(table.concat(peripheral_types, "|"))
 
 hashes["peripherals"] = peripheral_hash
 

@@ -27,9 +27,11 @@ local function do_teleport(sender)
 
 
     if sender ~= os.computerID() then 
-        --LOGGER:info("Sending route: " .. textutils.serialise(_G.route, { compact = true }) ..
-        --" length: " .. tostring(#_G.route))
-        encnet.send(sender, "TeleDone", table.unpack(_G.route))
+        if #_G.route == 0 then
+            encnet.send(sender, "TeleDone", "")
+        else
+            encnet.send(sender, "TeleDone", table.unpack(_G.route))
+        end
     end
     _G.destination = nil
     _G.route = nil

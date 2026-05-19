@@ -97,5 +97,13 @@ else
         return ("v%s,%s,%s"):format(self.x, self.y, self.z)
     end
 
-    shell.run("main.lua")
+    while true do
+        local ok, err = pcall(function ()
+            shell.run("main.lua", session_key)
+        end)
+
+        if not ok then
+            encnet.open("left", session_key)
+        end
+    end
 end

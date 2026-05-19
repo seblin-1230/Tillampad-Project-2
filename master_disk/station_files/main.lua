@@ -1,12 +1,12 @@
 ---@alias Station {computer_id: integer, station_id: integer, position: ccTweaked.Vector, name: string, description: string, neighbors: integer[], next_station: integer, unsafe: boolean}
 
-local sha256             = require("libs.encryption.sha256")
-local crypto             = require("libs.encryption.crypto")
-local utils              = require("libs.utils")
-local strings            = require("cc.strings")
-local csv                = require("libs.csv")
-local teleport           = require("main.teleport")
-local verify             = require("helpers.verify")
+local sha256        = require("libs.encryption.sha256")
+local crypto        = require("libs.encryption.crypto")
+local utils         = require("libs.utils")
+local strings       = require("cc.strings")
+local csv           = require("libs.csv")
+local teleport      = require("main.teleport")
+local verify        = require("helpers.verify")
 
 local communication = require("main.communication")
 
@@ -97,7 +97,7 @@ local session_key
 local w, h = term.getSize()
 local center_y = math.floor(h / 2)
 local selected = 1
-local selected_position = {0, 0, 0}
+local selected_position = { 0, 0, 0 }
 
 local header_height = 2
 local footer_height = 2
@@ -156,7 +156,7 @@ _G.get_computer_id = function(station_id)
     return nil
 end
 
-_G.update_stations = function ()
+_G.update_stations = function()
     this_station = read_this_station()
     stations, ordered_stations = read_stations()
 end
@@ -276,7 +276,7 @@ local function draw_coordinate_interface()
     draw_header("Coordinates:")
 
     clear_line(body_top)
-    clear_line(body_top+1)
+    clear_line(body_top + 1)
     print("Please enter coordinates")
 
     if selected == 1 then
@@ -285,13 +285,13 @@ local function draw_coordinate_interface()
         print("   X: " .. tostring(selected_position[1]))
         term.setBackgroundColor(colors.black)
         term.setTextColor(colors.white)
-        
+
         print("   Y: " .. tostring(selected_position[2]))
         print("   Z: " .. tostring(selected_position[3]))
         print("  Teleport")
     elseif selected == 2 then
         print("   X: " .. tostring(selected_position[1]))
-        
+
         term.setBackgroundColor(colors.white)
         term.setTextColor(colors.black)
         print("   Y: " .. tostring(selected_position[2]))
@@ -322,7 +322,7 @@ local function draw_coordinate_interface()
         term.setBackgroundColor(colors.black)
         term.setTextColor(colors.white)
     end
- 
+
     draw_footer()
 end
 
@@ -365,7 +365,6 @@ Below please select where you want to teleport to!
 
         term.setBackgroundColor(colors.black)
         term.setTextColor(colors.white)
-
     end
 
 
@@ -389,7 +388,7 @@ local function async_main()
             current_interface = 1
         end
 
-        
+
 
         if current_interface == 1 then
             if key == keys.up or key == keys.w then
@@ -400,7 +399,6 @@ local function async_main()
                 current_interface = selected + 1
                 selected = 1
             end
-
         elseif current_interface == 2 then
             if key == keys.up or key == keys.w then
                 selected = math.max(1, selected - 1)
@@ -423,7 +421,6 @@ local function async_main()
                 sleep(2)
                 current_interface = 1
             end
-
         elseif current_interface == 3 then
             if key == keys.up or key == keys.w then
                 selected = math.max(1, selected - 1)
@@ -432,13 +429,16 @@ local function async_main()
             elseif (key == keys.enter or key == keys.space) and selected ~= 4 then
                 term.setBackgroundColor(colors.white)
                 term.setTextColor(colors.black)
-                
+
                 while true do
                     set_line_background(body_top + 1 + selected, colors.white)
-    
-                    if selected == 1 then write("   X: ")
-                    elseif selected == 2 then write("   Y: ")
-                    elseif selected == 3 then write("   Z: ")
+
+                    if selected == 1 then
+                        write("   X: ")
+                    elseif selected == 2 then
+                        write("   Y: ")
+                    elseif selected == 3 then
+                        write("   Z: ")
                     end
                     local input = read(nil, nil, nil, tostring(selected_position[selected]))
 
@@ -451,9 +451,10 @@ local function async_main()
                 term.setBackgroundColor(colors.black)
                 term.setTextColor(colors.white)
             elseif (key == keys.enter or key == keys.space) and selected == 4 then
-                teleport.initiate(os.computerID(), {destination = vector.new(selected_position[1], selected_position[2], selected_position[3])}, false)
-                selected_position = {0, 0, 0}
-                sleep(2)
+                teleport.initiate(os.computerID(),
+                    { destination = vector.new(selected_position[1], selected_position[2], selected_position[3]) }, false)
+                selected_position = { 0, 0, 0 }
+                sleep(4)
                 current_interface = 1
             end
         end
@@ -481,7 +482,7 @@ end
 local function watch_disk()
     while true do
         local event, side = os.pullEvent("disk")
-        
+
         local pass = verify.master_disk(side)
         if pass then
             local drive = assert(peripheral.wrap(side))
@@ -491,15 +492,11 @@ local function watch_disk()
             drive.ejectDisk()
         end
     end
-
 end
 
 -- On startup
 --LOGGER:info("Starting: " .. os.time("utc"))
 
-if select(1, ...) ~= nil then
-    goto encnet_open
-end
 
 term.clear()
 term.setCursorPos(1, 1)
@@ -508,85 +505,90 @@ term.setTextColor(colors.yellow)
 print(tostring(this_station))
 term.setTextColor(colors.white)
 
--- Step 1
-local last_station
-local y = 2
-while true do
-    term.setCursorPos(1, y)
-    term.clearLine()
+if select(1, ...) == nil then
+    -- Step 1
+    local last_station
+    local y = 2
 
-    write("Last station (station id)? \n> ")
-    local response = read()
-
-    if response == "" or get_station_ids()[tonumber(response)] ~= nil then
-        last_station = get_computer_id(tonumber(response))
-        break
-    else
-        term.setCursorPos(1, 2)
+    while true do
+        term.setCursorPos(1, y)
         term.clearLine()
 
-        printError("Not a valid station id")
-        y = 2
+        write("Last station (station id)? \n> ")
+        local response = read()
+
+        if response == "" or get_station_ids()[tonumber(response)] ~= nil then
+            last_station = get_computer_id(tonumber(response))
+            break
+        else
+            term.setCursorPos(1, 2)
+            term.clearLine()
+
+            printError("Not a valid station id")
+            y = 2
+        end
     end
-end
 
 
--- Step 2
-local key_file = assert(fs.open("disk/secret.txt", "r"))
-local master_key = key_file.readAll()
-key_file.close()
+    -- Step 2
+    local key_file = assert(fs.open("disk/secret.txt", "r"))
+    local master_key = key_file.readAll()
+    key_file.close()
 
-if master_key == nil then
-    error("No master key found in disk")
-end
+    if master_key == nil then
+        error("No master key found in disk")
+    end
 
-encnet.open(peripheral.getName(modem), master_key)
+    encnet.open(peripheral.getName(modem), master_key)
 
-if last_station == nil then
-    session_key = generate_session_key()
-    print("Session key generated")
+    if last_station == nil then
+        session_key = generate_session_key()
+        print("Session key generated")
+    else
+        print("Waiting for session key, to inturupt just restart station")
+
+        encnet.send(last_station, "SeKeyReq")
+
+        local sender, payload_type, data
+        while payload_type ~= "SeKeyRes" or sender ~= last_station do
+            sender, payload_type, data = encnet.receive()
+        end
+
+        session_key = data[1]
+        print("Session key recived")
+    end
+
+    if this_station.next_station ~= -1 then
+        print("Waiting for key request from " .. tostring(stations[this_station.next_station]))
+
+        local sender, payload_type, data
+        while payload_type ~= "SeKeyReq" or sender ~= this_station.next_station do
+            sender, payload_type, data = encnet.receive()
+        end
+
+        encnet.send(sender, "SeKeyRes", session_key)
+
+        print("Request fullfiled, waiting for rest of network")
+
+        local sender, payload_type, data
+        while payload_type ~= "ClearMas" do
+            sender, payload_type, data = encnet.receive()
+        end
+    else
+        print("Broadcasting command to clear master key")
+        encnet.broadcast("ClearMas")
+    end
+
+    session_key = "62133560569735363088340605897410"
+
+    master_key = nil
+    encnet.close(peripheral.getName(modem))
+    encnet.open(peripheral.getName(modem), session_key)
+
+    set_startup_session_key(session_key)
 else
-    print("Waiting for session key, to inturupt just restart station")
-
-    encnet.send(last_station, "SeKeyReq")
-
-    local sender, payload_type, data
-    while payload_type ~= "SeKeyRes" or sender ~= last_station do
-        sender, payload_type, data = encnet.receive()
-    end
-
-    session_key = data[1]
-    print("Session key recived")
+    session_key = select(1, ...)
 end
-
-if this_station.next_station ~= -1 then
-    print("Waiting for key request from " .. tostring(stations[this_station.next_station]))
-
-    local sender, payload_type, data
-    while payload_type ~= "SeKeyReq" or sender ~= this_station.next_station do
-        sender, payload_type, data = encnet.receive()
-    end
-
-    encnet.send(sender, "SeKeyRes", session_key)
-
-    print("Request fullfiled, waiting for rest of network")
-
-    local sender, payload_type, data
-    while payload_type ~= "ClearMas" do
-        sender, payload_type, data = encnet.receive()
-    end
-else
-    print("Broadcasting command to clear master key")
-    encnet.broadcast("ClearMas")
-end
-
-session_key = "62133560569735363088340605897410"
-
-master_key = nil
-encnet.close(peripheral.getName(modem))
-encnet.open(peripheral.getName(modem), session_key)
-
-::encnet_open::
 
 parallel.waitForAll(
     function() communication.Handle_communication(session_key) end,
