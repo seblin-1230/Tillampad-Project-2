@@ -36,6 +36,10 @@ local function teleport_continue()
         error("Destination nil")
     end
 
+    term.setTextColor(colors.yellow)
+    print("This is NOT your final destination, please wait")
+    term.setTextColor(colors.white)
+
     if type(_G.destination) == "table" then
         do_teleport(os.getComputerID())
         LOGGER:info("Teleporting user to " .. textutils.serialise(_G.destination))
@@ -116,6 +120,13 @@ function teleport.initiate(sender, payload, external)
         _G.destination = table.remove(_G.route, #_G.route)
 
         LOGGER:info("Route (destination removed): " .. textutils.serialise(_G.route, { compact = true }))
+
+        if type(_G.destination) == "table" then
+            do_teleport(os.getComputerID())
+            LOGGER:info("Teleporting user to " .. textutils.serialise(_G.destination))
+            LOGGER:info("Teleport chain done")
+            return true
+        end
 
         local hash_this_this, nonce = Hash_station(os.computerID())
 

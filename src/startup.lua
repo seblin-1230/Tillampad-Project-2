@@ -69,7 +69,15 @@ else
     local id = shell.openTab("shell")
     print("Press f1 to continue, press f2 to interupt")
 
-    local event, key, is_held = os.pullEvent("key")
+    while true do
+        local event, key, is_held = os.pullEvent("key")
+        
+        if key == keys.f1 then
+            break
+        elseif key == keys.f2 then
+            os.shutdown()
+        end
+    end
     
     shell.switchTab(id)
     shell.exit()
