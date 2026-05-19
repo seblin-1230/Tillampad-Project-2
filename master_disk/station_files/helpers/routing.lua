@@ -47,7 +47,7 @@ function routing.generate_adjacent()
 end
 
 local function bfs(graph, src, par, dist)
-    LOGGER:info("Starting BFS")
+    --LOGGER:info("Starting BFS")
     local q = {}
     dist[src] = 0
     table.insert(q, src)
@@ -74,14 +74,14 @@ function routing.find_route(source, destination)
 
     local route = {}
     if not destination.computer_id then
-        LOGGER:info("Destination is coordinates, finding closest station")
+        --LOGGER:info("Destination is coordinates, finding closest station")
         local closest_station = routing.find_closest_station(destination, stations)
         if not closest_station then
-            LOGGER:warning("No stations within 10k blocks of destination, aborting")
+            --LOGGER:warning("No stations within 10k blocks of destination, aborting")
             return {}
         end
 
-        LOGGER:info("Closest station " .. tostring(closest_station) .. " at " .. tostring(closest_station.position))
+        --LOGGER:info("Closest station " .. tostring(closest_station) .. " at " .. tostring(closest_station.position))
         table.insert(route, destination)
         table.insert(route, closest_station.computer_id)
     else
@@ -101,7 +101,7 @@ function routing.find_route(source, destination)
     bfs(graph, src, par, dist)
 
     if dist[des] == math.huge then
-        LOGGER:warning("No path found to destination")
+        --LOGGER:warning("No path found to destination")
         return {}
     end
 
@@ -111,7 +111,7 @@ function routing.find_route(source, destination)
         current_node = par[current_node]
     end
 
-    LOGGER:info("Route found: ", textutils.serialise(route, {compact = true}))
+    --LOGGER:info("Route found: ", textutils.serialise(route, {compact = true}))
     return route
 end
 

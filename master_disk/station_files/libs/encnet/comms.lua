@@ -44,7 +44,7 @@ end
 ---@param ... nil|boolean|number|string The data
 ---@return string
 local function build_payload(payload_type, ...)
-    LOGGER:info("Building payload with type " .. payload_type)
+    --LOGGER:info("Building payload with type " .. payload_type)
     if #payload_type ~= 8 then
         error("Type not 8 character long")
     end
@@ -71,7 +71,7 @@ end
 ---@param modem string
 ---@param new_session_key string
 function comms.open(modem, new_session_key, new_protocol)
-    LOGGER:info("Opening encnet with key: " .. new_session_key)
+    --LOGGER:info("Opening encnet with key: " .. new_session_key)
     rednet.open(modem)
     session_key = new_session_key
     protocol = new_protocol
@@ -92,7 +92,7 @@ end
 ---@return boolean success If the send succeded, NOT if the payload was recived
 function comms.send(recipient, payload_type, ...)
     local built_payload = build_payload(payload_type, ...)
-    LOGGER:info("Sending comm to " .. tostring(recipient) .. "; Type: " .. payload_type)
+    --LOGGER:info("Sending comm to " .. tostring(recipient) .. "; Type: " .. payload_type)
     return rednet.send(recipient, built_payload, protocol)
 end
 
@@ -101,7 +101,7 @@ end
 ---@param ... any The data to encrypt and broadcast
 function comms.broadcast(payload_type, ...)
     local built_payload = build_payload(payload_type, ...)
-    LOGGER:info("Broadcasting comm; Type: " .. payload_type)
+    --LOGGER:info("Broadcasting comm; Type: " .. payload_type)
     rednet.broadcast(built_payload, protocol)
 end
 
@@ -109,14 +109,14 @@ end
 ---@param timeout? number How long to wait before timing out
 ---@return number? sender The id of the computer that sent the payload
 ---@return PayloadType? payload_type The payload type of the recived payload
----@return tablelib? data The decrypted recived data
+---@return table? data The decrypted recived data
 function comms.receive(timeout)
-    LOGGER:info("Listening for comms")
+    --LOGGER:info("Listening for comms")
     local sender, un_parsed_payload = rednet.receive(protocol, timeout)
     if not sender then return nil end
 
     local true_sender, payload_type, data = parse_payload(un_parsed_payload --[[@as string]])
-    LOGGER:info("Comm recived " .. payload_type)
+    --LOGGER:info("Comm recived " .. payload_type)
     return true_sender, payload_type, data
 end
 

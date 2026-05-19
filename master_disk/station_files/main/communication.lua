@@ -1,4 +1,4 @@
----@alias PayloadType "TeleInit" | "TeleVeri" | "TeleDeni" | "TeleDone" | "TeleWait" | "TeleQueu" | "SeKeyReq" | "SeKeyRes" | "ClearMas" | "NewStati" | "NewSVeri" | "NewNeigh"
+---@alias PayloadType "TeleInit" | "TeleVeri" | "TeleDeni" | "TeleDone" | "TeleWait" | "TeleQueu" | "SeKeyReq" | "SeKeyRes" | "ClearMas" | "NewStati" | "OtheStat"
 
 local function handle_communication(master_key)
     local new_station = require("main.new_station")
@@ -12,8 +12,7 @@ local function handle_communication(master_key)
         TeleWait = teleport.wait,
         TeleQueu = teleport.queue,
         NewStati = new_station.new_station,
-        NewSVeri = new_station.verification,
-        NewNeigh = new_station.new_neighbour,
+        OtheStat = new_station.get_other_stations
     }
 
     encnet.open("left", master_key)
@@ -21,20 +20,20 @@ local function handle_communication(master_key)
     while true do
         local sender, payload_type, payload = assert(encnet.receive())
 
-        LOGGER:info("Comm recived; Type: " .. payload_type)
+        --LOGGER:info("Comm recived; Type: " .. payload_type)
         os.queueEvent(payload_type, sender, payload)
         local sucess = function_table[payload_type](sender, payload, true)
 
 
         if not sucess then
-            LOGGER:error(string.format("Invalid comm; sender: %d; message type: %s; payload: %s", sender, payload_type,
-                textutils.serialise(payload)))
+            --LOGGER:error(string.format("Invalid comm; sender: %d; message type: %s; payload: %s", sender, payload_type,
+            --    textutils.serialise(payload)))
         end
     end
 end
 
 local function wait_for(payload_type, sender, timeout)
-    -- LOGGER:info("Wait for called, type: " .. payload_type)
+    -- --LOGGER:info("Wait for called, type: " .. payload_type)
     local sucess = true
 
     if timeout ~= nil then
@@ -53,7 +52,7 @@ local function wait_for(payload_type, sender, timeout)
     else
         repeat
             local event, fn_sender, payload = os.pullEvent(payload_type)
-            LOGGER:info(payload_type .. " recived")
+            --LOGGER:info(payload_type .. " recived")
             if sender == nil then sender = fn_sender end
         until fn_sender == sender
     end

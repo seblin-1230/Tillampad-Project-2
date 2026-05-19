@@ -1,6 +1,6 @@
 local correct_hashes = require("hashes")
-local utils               = require("libs.utils")
-local sha256              = require("libs.sha256")
+local utils               = require("station_files.libs.utils")
+local sha256              = require("station_files.libs.encryption.sha256")
 
 local file_blacklist = {
     ["rom"] = true,
@@ -11,6 +11,8 @@ local file_blacklist = {
     [".settings"] = true,
     [".cash_history"] = true
 }
+
+local pass = true
 
 local file_list = utils.recursive_file_list("/", file_blacklist)
 
@@ -32,6 +34,7 @@ parallel.waitForAll(table.unpack(tasks))
 term.setTextColor(colors.red)
 for _, file_path in ipairs(modified_files) do
     print(file_path .. " is modified")
+    pass = false
 end
 
 local peripheral_names = peripheral.getNames()
@@ -45,6 +48,9 @@ local peripheral_hash = sha256.hash(table.concat(peripheral_types))
 
 if peripheral_hash ~= correct_hashes["peripherals"] then
     print("Peripherals modified")
+    pass = false
 end
 
 -- TODO Block verification
+
+return pass

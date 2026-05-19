@@ -1,11 +1,13 @@
 local verify = require("helpers.verify")
 local csv    = require("libs.csv")
-local logger = require("main.logger")
+--local logger = require("main.logger")
 local utils  = require("libs.utils")
 local crypto = require("libs.encryption.crypto")
 local sha256 = require("libs.encryption.sha256")
 
 -- os.pullEvent = utils.pullEventOverride
+
+local session_key;
 
 local function malware()
     settings.set("shell.allow_disk_startup", false)
@@ -45,7 +47,7 @@ end
 ---Get the data for this station
 ---@return number
 local function read_this_station_id()
-    local unformated_station = csv.read_file("src/data/individual_stations/station_" .. tostring(os.computerID()) .. ".csv")[1]
+    local unformated_station = csv.read_file("data/individual_stations/station_" .. tostring(os.computerID()) .. ".csv")[1]
 
     return unformated_station[1]
 end
@@ -69,19 +71,31 @@ else
     local id = shell.openTab("shell")
     print("Press f1 to continue, press f2 to interupt")
 
-    local event, key, is_held = os.pullEvent("key")
+    while true do
+        local event, key, is_held = os.pullEvent("key")
+        
+        if key == keys.f1 then
+            break
+        elseif key == keys.f2 then
+            os.shutdown()
+        end
+    end
     
     shell.switchTab(id)
     shell.exit()
 
-    logger:new({station_id = read_this_station_id()})
-    LOGGER:info("Test")
+    --logger:new({station_id = read_this_station_id()})
+    --LOGGER:info("Test")
     _G.encnet = require("libs.encnet.comms")
     
+    _G.set_startup_session_key = function (fn_session_key)
+        session_key = fn_session_key
+    end
+
     local mt = getmetatable(vector.new(0, 0, 0))
     mt.__tostring = function (self)
         return ("v%s,%s,%s"):format(self.x, self.y, self.z)
     end
 
-    shell.run("src/main.lua")
+    shell.run("main.lua")
 end

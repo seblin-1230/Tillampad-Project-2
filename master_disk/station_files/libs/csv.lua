@@ -41,7 +41,7 @@ function csv.append_file(path, data)
     local file = fs.open(path, "a")
     assert(file)
 
-    file.write("\n" .. table.concat(data, ","))
+    file.write(table.concat(data, ",") .. "\n")
 end
 
 return csv

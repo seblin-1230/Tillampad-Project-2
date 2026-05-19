@@ -13,9 +13,9 @@ local file_blacklist = {
 
 
 local function hash_files()
-    LOGGER:info("Initiating file hashing")
+    --LOGGER:info("Initiating file hashing")
 
-    local file_paths = utils.recursive_file_list("src", file_blacklist)
+    local file_paths = utils.recursive_file_list("/", file_blacklist)
 
     local tasks = {}
     local results = {}
@@ -23,13 +23,13 @@ local function hash_files()
     for _, path in ipairs(file_paths) do
         local l_path = path:gsub("%s+$", "")
         table.insert(tasks, function()
-            LOGGER:info("Hashing file \"" .. l_path .. "\"")
+            --LOGGER:info("Hashing file \"" .. l_path .. "\"")
             local file = assert(fs.open(l_path, "r"))
             local message = assert(file.readAll())
             file.close()
 
             results[path] = sha256.hash(message)
-            LOGGER:info("Hashed file \"" .. l_path .. "\" : " .. results[path])
+            --LOGGER:info("Hashed file \"" .. l_path .. "\" : " .. results[path])
         end)
     end
 
@@ -43,16 +43,16 @@ local function hash_files()
 
     parallel.waitForAll(table.unpack(tasks))
 
-    LOGGER:info("All individual files hashed")
+    --LOGGER:info("All individual files hashed")
 
     local file_hash = sha256.hash(table.concat(ordered))
-    LOGGER:info("All file hashes hashed, bytes hashed: ", total_bytes, " : ", file_hash)
+    --LOGGER:info("All file hashes hashed, bytes hashed: ", total_bytes, " : ", file_hash)
 
     return file_hash
 end
 
 local function hash_peripherals()
-    LOGGER:info("Initiating peripheral hashing")
+    --LOGGER:info("Initiating peripheral hashing")
 
     local peripheral_names = peripheral.getNames()
     
@@ -62,7 +62,7 @@ local function hash_peripherals()
     end
 
     local peripheral_hash = sha256.hash(table.concat(peripheral_types))
-    LOGGER:info("Peripherals hashed: " .. peripheral_hash)
+    --LOGGER:info("Peripherals hashed: " .. peripheral_hash)
 
     return peripheral_hash
 end
@@ -73,7 +73,7 @@ local function hash_blocks()
 end
 
 function Hash_station(computer_id, nonce)
-    LOGGER:info("Initiating station hashing")
+    --LOGGER:info("Initiating station hashing")
     local file_hash = hash_files()
     local peripheral_hash = hash_peripherals()
     local block_hash = hash_blocks()

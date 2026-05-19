@@ -1,7 +1,7 @@
-local csv = require "libs.csv"
+local csv = require("libs.csv")
 local new_station = {}
 
-function new_station.new_station(sender, payload)
+function new_station.new_station(sender, payload, external)
     csv.append_file("data/stations.csv", payload)
 
     local this_station = get_this_station()
@@ -23,6 +23,13 @@ function new_station.new_station(sender, payload)
     end
 
     update_stations()
+end
+
+function new_station.get_other_stations(sender, payload, external)
+    if external then
+        local stations = get_stations()
+        encnet.send(sender, "OtheStat", textutils.serialise(stations, {allow_repetitions=true}))
+    end
 end
 
 return new_station
