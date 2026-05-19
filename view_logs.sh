@@ -13,7 +13,7 @@ COLORS=(
 LOGS=()
 
 for dir in 0 1 2 3; do
-    log_dir="$HOME/.local/share/craftos-pc/computer/${dir}/logs"
+    log_dir="/mnt/c/Users/Sebastian/AppData/Roaming/CraftOS-PC/computer/${dir}/logs"
 
     if [[ ! -d "$log_dir" ]]; then
         echo "Missing directory: $log_dir" >&2

@@ -42,8 +42,22 @@ packet-beta
 0-11: "Nonce (12 Bytes)"
 12-19: "Type (8 Bytes)"
 20-23: "ID(4Bytes)"
-24-31: "Payload (...)"
+24-31: "Payload Format (...)"
+32-63: "Payload (...)"
 ```
+### Payload Format, format
+	Size: The byte size of the fist part of the payload (max 255)
+```mermaid
+---
+title: "Message Format"
+---
+packet-beta
+0-1: "Size 1"
+2-3: "Size 2"
+4-5: "Size ..."
+6-7: "Size n"
+```
+
 ### Teleport initiate
 	The message sent when a station wants to teleport a user to another station
 	Type: TeleInit
@@ -53,6 +67,7 @@ title: "Payload Format"
 ---
 packet-beta
 0-31: "Station hash"
+32-43: "Nonce"
 ```
 ### Teleport verification
 	The message sent from the station being telepoted to, used to verify the station

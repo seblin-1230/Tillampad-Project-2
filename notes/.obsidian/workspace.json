@@ -11,10 +11,28 @@
             "id": "5bac6ee8b8834c11",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "Station Logic.md",
+                "mode": "source",
+                "source": false
+              },
               "icon": "lucide-file",
-              "title": "New tab"
+              "title": "Station Logic"
+            }
+          },
+          {
+            "id": "45098022bb8262dd",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Terms.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Terms"
             }
           }
         ]
@@ -178,11 +196,13 @@
   },
   "active": "5bac6ee8b8834c11",
   "lastOpenFiles": [
+    "Terms.md",
+    "Station Logic.md",
+    "CC server ideas.md",
+    "Implementation notes.md",
     "Untitled.base",
     "Untitled 2.base",
     "Untitled 1.base",
-    "Terms.md",
-    "Station Logic.md",
     "[Terms.md",
     "Nonce.md",
     "Station-logic.txt"

@@ -8,9 +8,9 @@ local csv                = require("libs.csv")
 local teleport           = require("main.teleport")
 local verify             = require("helpers.verify")
 
-local communication = require("main.communication")
+local communication      = require("main.communication")
 
-local modem         = peripheral.find("modem")
+local modem              = peripheral.find("modem")
 
 local function generate_session_key()
     local key_count = settings.get("station.key_count")
@@ -97,14 +97,13 @@ local session_key
 local w, h = term.getSize()
 local center_y = math.floor(h / 2)
 local selected = 1
-local selected_position = {0, 0, 0}
 
 local header_height = 2
 local footer_height = 2
 
 local body_top = header_height + 1
 local body_bottom = h - footer_height
-local body_height = body_bottom - body_top + 1
+local body_hieght = body_bottom - body_top + 1   
 
 -- local listHeight = listBottom - listTop + 1
 
@@ -174,29 +173,14 @@ local function clear_line(y)
     term.clearLine()
 end
 
-local function set_line_background(y, bg)
-    local old_bg = term.getBackgroundColor()
-
-    term.setCursorPos(1, y)
-    term.setBackgroundColor(bg)
-    term.clearLine()
-
-    term.setBackgroundColor(old_bg)
-end
-
 local function get_station_interface_info(selection_id, extra_space)
     if extra_space == nil then extra_space = 0 end
-    local station = stations[ordered_stations[selection_id]]
+    local station = stations[selection_id]
 
-    if station == nil then
-        return strings.ensure_width("")
-    end
+    local station_id = "Station " .. tostring(station.station_id)
+    local coordinates = "; " .. tostring(station.position)
 
-    local station_id = strings.ensure_width("Station " .. tostring(station.station_id), 12)
-    local coordinates = strings.ensure_width("; " .. tostring(station.position):sub(2, #tostring(station.position)), 21)
-    local name = strings.ensure_width("; " .. station.name, 18)
-
-    return strings.ensure_width(station_id .. name .. coordinates)
+    return strings.ensure_width(station_id .. "; " .. station.name .. coordinates)
 end
 
 local function draw_header(page_name)
@@ -204,7 +188,7 @@ local function draw_header(page_name)
     LOGGER:info("Drawing header")
     term.setBackgroundColor(colors.gray)
     term.setTextColor(colors.white)
-
+    
     clear_line(1)
     term.setTextColor(colors.purple)
     write(get_station_interface_info(this_station_list_position))
@@ -216,13 +200,7 @@ local function draw_header(page_name)
 end
 
 local function draw_footer()
-    term.setBackgroundColor(colors.gray)
-    clear_line(h - 1)
-    write(strings.ensure_width(strings.ensure_width("\24 or W: Up", w - 25) .. "ETR or SPC: Select"))
-
-    clear_line(h)
-    write(strings.ensure_width(strings.ensure_width("\25 or S: Down", w - 25) .. "Q: Back"))
-    term.setBackgroundColor(colors.black)
+    
 end
 
 local function draw_station_interface()
@@ -233,7 +211,7 @@ local function draw_station_interface()
 
     -- Draw body
     LOGGER:info("Drawing body")
-    local max_visible = body_height
+    local max_visible = body_hieght
     local scroll_offset = selected - math.floor(max_visible / 2)
 
     scroll_offset = math.max(1, scroll_offset)
@@ -243,7 +221,7 @@ local function draw_station_interface()
 
     for i = 0, max_visible - 1 do
         local itemIndex = scroll_offset + i
-        local screenY = body_top + i
+        local screenY = body_bottom + i
 
         clear_line(screenY)
 
@@ -256,121 +234,19 @@ local function draw_station_interface()
 
                 clear_line(screenY)
                 term.setCursorPos(2, screenY)
-                write("> " .. get_station_interface_info(itemIndex))
+                write("> " .. ordered_stations[itemIndex])
 
                 term.setBackgroundColor(colors.black)
                 term.setTextColor(colors.white)
             else
-                write("  " .. get_station_interface_info(itemIndex))
+                write("  " .. ordered_stations[itemIndex])
             end
         end
     end
-
-    draw_footer()
-end
-
-local function draw_coordinate_interface()
-    term.clear()
-    term.setCursorPos(1, 1)
-
-    draw_header("Coordinates:")
-
-    clear_line(body_top)
-    clear_line(body_top+1)
-    print("Please enter coordinates")
-
-    if selected == 1 then
-        term.setBackgroundColor(colors.white)
-        term.setTextColor(colors.black)
-        print("   X: " .. tostring(selected_position[1]))
-        term.setBackgroundColor(colors.black)
-        term.setTextColor(colors.white)
-        
-        print("   Y: " .. tostring(selected_position[2]))
-        print("   Z: " .. tostring(selected_position[3]))
-        print("  Teleport")
-    elseif selected == 2 then
-        print("   X: " .. tostring(selected_position[1]))
-        
-        term.setBackgroundColor(colors.white)
-        term.setTextColor(colors.black)
-        print("   Y: " .. tostring(selected_position[2]))
-        term.setBackgroundColor(colors.black)
-        term.setTextColor(colors.white)
-
-        print("   Z: " .. tostring(selected_position[3]))
-        print("  Teleport")
-    elseif selected == 3 then
-        print("   X: " .. tostring(selected_position[1]))
-        print("   Y: " .. tostring(selected_position[2]))
-
-        term.setBackgroundColor(colors.white)
-        term.setTextColor(colors.black)
-        print("   Z: " .. tostring(selected_position[3]))
-        term.setBackgroundColor(colors.black)
-        term.setTextColor(colors.white)
-
-        print("  Teleport")
-    elseif selected == 4 then
-        print("   X: " .. tostring(selected_position[1]))
-        print("   Y: " .. tostring(selected_position[2]))
-        print("   Z: " .. tostring(selected_position[3]))
-
-        term.setBackgroundColor(colors.white)
-        term.setTextColor(colors.black)
-        print("  Teleport")
-        term.setBackgroundColor(colors.black)
-        term.setTextColor(colors.white)
-    end
- 
-    draw_footer()
 end
 
 local function draw_main_interface()
     draw_header("Main page")
-
-    clear_line(body_top)
-    local message =
-    [[
-Welcome to TeleNet!
-TeleNet is a transportation network utilizing hexcasting to transport you almost anywhere (near) instantly!
-TeleNet is also made to be completly secure. If a station has been modifed in any way you will not be teleported there.
-Below please select where you want to teleport to!
-]]
-    print(message)
-
-    local x, y = term.getCursorPos()
-
-    if selected == 1 then
-        term.setBackgroundColor(colors.white)
-        term.setTextColor(colors.black)
-
-        clear_line(y)
-        write(" > Station")
-
-        term.setBackgroundColor(colors.black)
-        term.setTextColor(colors.white)
-
-        clear_line(y + 1)
-        write("    Coordinates")
-    else
-        clear_line(y)
-        write("    Station")
-
-        term.setBackgroundColor(colors.white)
-        term.setTextColor(colors.black)
-
-        clear_line(y + 1)
-        write(" > Coordinates")
-
-        term.setBackgroundColor(colors.black)
-        term.setTextColor(colors.white)
-
-    end
-
-
-
-    draw_footer()
 end
 
 local function async_main()
@@ -380,33 +256,29 @@ local function async_main()
 
     local current_interface = 1
 
-    LOGGER:info(textutils.serialise(ordered_stations, { compact = true }))
-
     local event, key
     while true do
-        LOGGER:info("Selected: " .. tostring(selected))
+
         if key == keys.q then
             current_interface = 1
         end
 
-        
-
         if current_interface == 1 then
-            if key == keys.up or key == keys.w then
+            if key == keys.up then
                 selected = math.max(1, selected - 1)
-            elseif key == keys.down or key == keys.s then
-                selected = math.min(2, selected + 1)
-            elseif key == keys.enter or key == keys.space then
-                current_interface = selected + 1
-                selected = 1
-            end
+                current_interface = 2
 
+            elseif key == keys.down then
+                selected = math.min(2, selected + 1)
+            end
         elseif current_interface == 2 then
-            if key == keys.up or key == keys.w then
+            if key == keys.up then
                 selected = math.max(1, selected - 1)
-            elseif key == keys.down or key == keys.s then
+
+            elseif key == keys.down then
                 selected = math.min(#ordered_stations, selected + 1)
-            elseif key == keys.enter or key == keys.space then
+
+            elseif key == keys.enter then
                 term.clear()
                 term.setCursorPos(1, 1)
                 term.setTextColor(colors.white)
@@ -417,55 +289,19 @@ local function async_main()
                     print("Cannot teleport to this station, already here")
                 else
                     print("Initiating teleport to " .. tostring(selected_station))
-                    teleport.initiate(os.computerID(), { destination = selected_station }, false)
+                    teleport.initiate(os.computerID(), {destination = selected_station}, false)
                 end
-
-                sleep(2)
-                current_interface = 1
-            end
-
-        elseif current_interface == 3 then
-            if key == keys.up or key == keys.w then
-                selected = math.max(1, selected - 1)
-            elseif key == keys.down or key == keys.s then
-                selected = math.min(4, selected + 1)
-            elseif (key == keys.enter or key == keys.space) and selected ~= 4 then
-                term.setBackgroundColor(colors.white)
-                term.setTextColor(colors.black)
                 
-                while true do
-                    set_line_background(body_top + 1 + selected, colors.white)
-    
-                    if selected == 1 then write("   X: ")
-                    elseif selected == 2 then write("   Y: ")
-                    elseif selected == 3 then write("   Z: ")
-                    end
-                    local input = read(nil, nil, nil, tostring(selected_position[selected]))
-
-                    if input:match("^%d+$") then
-                        selected_position[selected] = tonumber(input)
-                        break
-                    end
-                end
-
-                term.setBackgroundColor(colors.black)
-                term.setTextColor(colors.white)
-            elseif (key == keys.enter or key == keys.space) and selected == 4 then
-                teleport.initiate(os.computerID(), {destination = vector.new(selected_position[1], selected_position[2], selected_position[3])}, false)
-                selected_position = {0, 0, 0}
                 sleep(2)
                 current_interface = 1
             end
-        end
 
-        term.clear()
+        end
 
         if current_interface == 1 then
             draw_main_interface()
         elseif current_interface == 2 then
             draw_station_interface()
-        elseif current_interface == 3 then
-            draw_coordinate_interface()
         end
 
         while true do

@@ -55,6 +55,10 @@ If so return true and the encryption key
 2. Station checks if $hash(identity)=master\_hash$
 3. If it does return true
 4. Else return false
+
+Notes: 
+Current salt: j8OtehrzI6Iw7jNVJPtgjBUBefMJv38Y
+
 ---
 ## Integrity check
 This is a script on the master disk that an admin runs after master disk verification to confirm that the station is safe.

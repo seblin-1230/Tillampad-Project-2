@@ -1,4 +1,4 @@
-local utils = require("libs.utils")
+local utils = require("sta")
 local sha256 = require("libs.sha256")
 local file = fs.open("disk/hashes.lua", "w")
 
