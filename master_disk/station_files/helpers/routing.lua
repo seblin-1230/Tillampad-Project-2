@@ -72,28 +72,28 @@ end
 function routing.find_route(source, destination)
     local stations = get_stations()
 
-    local route = {}
+    local final_vector = nil
+    local des
+
     if not destination.computer_id then
-        --LOGGER:info("Destination is coordinates, finding closest station")
         local closest_station = routing.find_closest_station(destination, stations)
         if not closest_station then
-            --LOGGER:warning("No stations within 10k blocks of destination, aborting")
             return {}
         end
 
-        --LOGGER:info("Closest station " .. tostring(closest_station) .. " at " .. tostring(closest_station.position))
-        table.insert(route, destination)
-        table.insert(route, closest_station.computer_id)
+        final_vector = destination
+        des = closest_station.computer_id
     else
-        table.insert(route, destination.computer_id)
+        des = destination.computer_id
     end
 
     local graph = routing.generate_adjacent()
-    local src, des = source.computer_id, route[#route]
+    local src = source.computer_id
 
     local par = {}
     local dist = {}
-    for id, station_info in pairs(stations) do
+
+    for id, _ in pairs(stations) do
         par[id] = -1
         dist[id] = math.huge
     end
@@ -101,17 +101,35 @@ function routing.find_route(source, destination)
     bfs(graph, src, par, dist)
 
     if dist[des] == math.huge then
-        --LOGGER:warning("No path found to destination")
         return {}
     end
 
+    -- Build backwards
+    local reverse_route = {}
     local current_node = des
+
+    table.insert(reverse_route, des)
+
     while par[current_node] ~= -1 do
-        table.insert(route, par[current_node])
         current_node = par[current_node]
+        table.insert(reverse_route, current_node)
     end
 
-    --LOGGER:info("Route found: ", textutils.serialise(route, {compact = true}))
+    -- Reverse into forward route
+    local route = {}
+
+    for i = #reverse_route, 1, -1 do
+        table.insert(route, reverse_route[i])
+    end
+
+    -- Remove source station
+    table.remove(route, 1)
+
+    -- Append final vector destination if needed
+    if final_vector then
+        table.insert(route, final_vector)
+    end
+
     return route
 end
 

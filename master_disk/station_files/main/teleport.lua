@@ -26,8 +26,10 @@ local function do_teleport(sender)
     os.pullEvent("circle_stopped")
 
 
-    if sender ~= os.computerID() then 
-        if #_G.route == 0 then
+    if sender ~= os.computerID() then
+        if #_G.route == 0 and type(_G.destination) == "table" then
+            encnet.send(sender, "TeleDone", tostring(_G.destination))
+        elseif #_G.route == 0 then
             encnet.send(sender, "TeleDone", "")
         else
             encnet.send(sender, "TeleDone", table.unpack(_G.route))
@@ -49,7 +51,7 @@ local function do_teleport(sender)
 end
 
 local function teleport_continue()
-    _G.destination = table.remove(_G.route, #_G.route)
+    _G.destination = table.remove(_G.route, 1)
     --LOGGER:info("Continuing teleport from " .. tostring(get_this_station()) .. " to " .. tostring(_G.destination))
 
     if _G.destination == nil then
@@ -137,11 +139,11 @@ function teleport.initiate(sender, payload, external)
 
         --LOGGER:info("Route: " .. textutils.serialise(_G.route, { compact = true }))
 
-        table.remove(_G.route, #_G.route)
-        _G.destination = table.remove(_G.route, #_G.route)
-
+        print(textutils.serialise(_G.route, { compact = true }))
+        _G.destination = table.remove(_G.route, 1)
+        print(_G.destination)
+        sleep(2)
         --LOGGER:info("Route (destination removed): " .. textutils.serialise(_G.route, { compact = true }))
-
         if type(_G.destination) == "table" then
             do_teleport(os.getComputerID())
             --LOGGER:info("Teleporting user to " .. textutils.serialise(_G.destination))
@@ -154,6 +156,7 @@ function teleport.initiate(sender, payload, external)
         --LOGGER:info("Sending teleport request to: " .. tostring(get_stations()[_G.destination]))
         --LOGGER:info("With hash: " .. hash_this_this .. ", " .. nonce)
         print("Contacting next station")
+        sleep(2)
         encnet.send(_G.destination, "TeleInit", hash_this_this, nonce)
     end
 
@@ -216,7 +219,7 @@ function teleport.done(sender, payload, external)
                 for str in string.gmatch(payload[i]:gsub("v", ""), "[^,]+") do
                     table.insert(split, tonumber(str))
                 end
-                
+
                 local vec = vector.new(split[1], split[2], split[3])
 
                 --LOGGER:info(string.format("Item %d: Vector %s", i, tostring(vec)))
@@ -249,7 +252,7 @@ end
 function teleport.wait(sender, payload, external)
     if external then
         --LOGGER:warning(string.format("%s is busy, waiting for queue event", get_stations()[sender]))
-        
+
         term.setTextColor(colors.yellow)
         print("Next station busy, wait a moment")
         term.setTextColor(colors.white)
@@ -264,7 +267,6 @@ function teleport.queue(sender, payload, external)
     if external then
         --LOGGER:info(string.format("%s is now free, starting teleport sequence", get_stations()[sender]))
         print("Next station free, teleporting")
-        table.insert(_G.route, _G.destination)
         teleport_continue()
     end
     return true

@@ -569,7 +569,7 @@ if select(1, ...) == nil then
         print("Waiting for key request from " .. tostring(stations[this_station.next_station]))
 
         local sender, payload_type, data
-        while payload_type ~= "SeKeyReq" or sender ~= this_station.next_station do
+        while payload_type ~= "SeKeyReq" do
             sender, payload_type, data = encnet.receive()
         end
 

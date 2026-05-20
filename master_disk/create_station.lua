@@ -4,7 +4,13 @@ for _, file in ipairs(fs.list("disk/station_files/")) do
     fs.copy(fs.combine("disk/station_files", file), fs.combine("/", file))
 end
 
-local position = vector.new(gps.locate(5, true)):sub(vector.new(-1, 0, 0))
+settings.set("computer_id", os.computerID())
+settings.set("station.key_count", 0)
+settings.set("crypto.use_random_org", true)
+settings.save()
+
+local x, y, z = gps.locate(5, false)
+local position = vector.new(x - 1, y , z + 1)
 print("Position: " .. tostring(position))
 
 local routing = require("helpers.routing")
@@ -165,17 +171,16 @@ end
 
 sleep(2)
 
-settings.set("computer_id", os.computerID())
-settings.set("station.key_count", 0)
-settings.set("crypto.use_random_org", true)
-settings.save()
+
 
 while true do
-    local ok, err = pcall(function ()
+    local ok, err = xpcall(function ()
         shell.run("main.lua", session_key)
-    end)
+    end, debug.getlocal)
 
     if not ok then
+        sleep(5)
+        printError(err)
         encnet.open("left", session_key)
     end
 end

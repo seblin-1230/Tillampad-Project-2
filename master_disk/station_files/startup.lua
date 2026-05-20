@@ -21,7 +21,7 @@ local function malware()
         os.pullEventRaw = nil
         os.shutdown()
     ]])
-    
+
 
     os.reboot()
 end
@@ -33,7 +33,7 @@ local function wait_for_master_disk()
 
     repeat
         local event, side = os.pullEvent("disk")
-        
+
         local passed = true
         --local passed, reason = verify.master_disk(side)
 
@@ -47,7 +47,8 @@ end
 ---Get the data for this station
 ---@return number
 local function read_this_station_id()
-    local unformated_station = csv.read_file("data/individual_stations/station_" .. tostring(os.computerID()) .. ".csv")[1]
+    local unformated_station = csv.read_file("data/individual_stations/station_" .. tostring(os.computerID()) .. ".csv")
+    [1]
 
     return unformated_station[1]
 end
@@ -73,36 +74,38 @@ else
 
     while true do
         local event, key, is_held = os.pullEvent("key")
-        
+
         if key == keys.f1 then
             break
         elseif key == keys.f2 then
             os.shutdown()
         end
     end
-    
+
     shell.switchTab(id)
     shell.exit()
 
     --logger:new({station_id = read_this_station_id()})
     --LOGGER:info("Test")
     _G.encnet = require("libs.encnet.comms")
-    
-    _G.set_startup_session_key = function (fn_session_key)
+
+    _G.set_startup_session_key = function(fn_session_key)
         session_key = fn_session_key
     end
 
     local mt = getmetatable(vector.new(0, 0, 0))
-    mt.__tostring = function (self)
+    mt.__tostring = function(self)
         return ("v%s,%s,%s"):format(self.x, self.y, self.z)
     end
 
     while true do
-        local ok, err = pcall(function ()
+        local ok, err = xpcall(function()
             shell.run("main.lua", session_key)
-        end)
+        end, debug.getlocal)
 
         if not ok then
+            sleep(5)
+            printError(err)
             encnet.open("left", session_key)
         end
     end
