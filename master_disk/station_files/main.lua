@@ -32,7 +32,7 @@ local function format_station(raw)
         position = vector.new(raw[3], raw[4], raw[5]),
         name = raw[6],
         description = raw[7],
-        next_station = raw[9],
+        next_station = tonumber(raw[9]),
         unsafe = false
     }
 
@@ -193,7 +193,7 @@ local function get_station_interface_info(selection_id, extra_space)
     end
 
     local station_id = strings.ensure_width("Station " .. tostring(station.station_id), 12)
-    local coordinates = strings.ensure_width("; " .. tostring(station.position):sub(2, #tostring(station.position)), 21)
+    local coordinates = strings.ensure_width("; " .. tostring(station.position):gsub("v", ""))
     local name = strings.ensure_width("; " .. station.name, 18)
 
     return strings.ensure_width(station_id .. name .. coordinates)
@@ -218,10 +218,10 @@ end
 local function draw_footer()
     term.setBackgroundColor(colors.gray)
     clear_line(h - 1)
-    write(strings.ensure_width(strings.ensure_width("\24 or W: Up", w - 25) .. "ETR or SPC: Select"))
+    write(strings.ensure_width(strings.ensure_width("\24 or W: Up", w - 25) .. "ETR or SPC: Select", w - 1))
 
     clear_line(h)
-    write(strings.ensure_width(strings.ensure_width("\25 or S: Down", w - 25) .. "Q: Back"))
+    write(strings.ensure_width(strings.ensure_width("\25 or S: Down", w - 25) .. "Q: Back", w -1))
     term.setBackgroundColor(colors.black)
 end
 
@@ -386,6 +386,7 @@ local function async_main()
         --LOGGER:info("Selected: " .. tostring(selected))
         if key == keys.q then
             current_interface = 1
+            selected = 1
         end
 
 
@@ -420,6 +421,7 @@ local function async_main()
 
                 sleep(2)
                 current_interface = 1
+                selected = 1
             end
         elseif current_interface == 3 then
             if key == keys.up or key == keys.w then
@@ -442,7 +444,7 @@ local function async_main()
                     end
                     local input = read(nil, nil, nil, tostring(selected_position[selected]))
 
-                    if input:match("^%d+$") then
+                    if tonumber(input) then
                         selected_position[selected] = tonumber(input)
                         break
                     end
@@ -456,7 +458,11 @@ local function async_main()
                 selected_position = { 0, 0, 0 }
                 sleep(4)
                 current_interface = 1
+                selected = 1
             end
+        else
+            current_interface = 1
+            selected = 1
         end
 
         term.clear()
@@ -558,6 +564,7 @@ if select(1, ...) == nil then
         print("Session key recived")
     end
 
+    print(this_station.next_station)
     if this_station.next_station ~= -1 then
         print("Waiting for key request from " .. tostring(stations[this_station.next_station]))
 

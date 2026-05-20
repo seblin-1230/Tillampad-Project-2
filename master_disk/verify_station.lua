@@ -1,3 +1,4 @@
+package.path = package.path .. ";/disk/station_files/?.lua;/disk/?.lua"
 local correct_hashes = require("hashes")
 local utils               = require("station_files.libs.utils")
 local sha256              = require("station_files.libs.encryption.sha256")

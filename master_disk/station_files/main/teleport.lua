@@ -195,15 +195,8 @@ function teleport.verification(sender, payload, external)
 end
 
 function teleport.denied(sender, payload, external)
-    if external then
-        --LOGGER:error("Teleport denied.")
-        get_stations()[_G.destination].unsafe = true
-        return true
-    else
-        --LOGGER:warning("Teleport unsafe, marking " .. tostring(_G.destination) .. " as unsafe. Retrying teleport")
-        teleport.initiate(os.computerID(), { destination = _G.route[1] }, false)
-        return false
-    end
+    in_teleport = false
+    return true
 end
 
 ---Sent when teleport done

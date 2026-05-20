@@ -8,19 +8,18 @@ function csv.read_file(path)
     for line in io.lines(path, "l") do
         -- print(line)
         local split = {}
-
-        for sub_str in string.gmatch(line, "[^,]+") do
-            local value = sub_str --[[@type string|number?]]
-
-            if sub_str:match("^[%d|-]+$") ~= nil then
-                value = tonumber(sub_str)
-            end
-
+        local pos = 1
+        while pos <= #line + 1 do
+            local next_comma = line:find(",", pos, true)
+            if not next_comma then next_comma = #line + 1 end
+            local field = line:sub(pos, next_comma - 1)
+            local value = tonumber(field) or field
             table.insert(split, value)
+            pos = next_comma + 1
         end
 
         lines[i] = split
-        i = i +1
+        i = i + 1
     end
 
     return lines

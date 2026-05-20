@@ -20,7 +20,7 @@ while true do
     local pass = require("verify_station")
 
     if not pass then
-        printError("Please fix above issues and try again")
+        printError("Please fix above issues and press f1 to try again")
     else
         break
     end
@@ -52,7 +52,7 @@ local function get_response(required_type)
                 return tonumber(input)
             end
         else
-            if input ~= "" then
+            if input ~= "" and not input:match(",") then
                 return input
             end
         end
@@ -170,4 +170,14 @@ settings.set("station.key_count", 0)
 settings.set("crypto.use_random_org", true)
 settings.save()
 
-shell.run("main.lua", session_key)
+while true do
+    local ok, err = pcall(function ()
+        shell.run("main.lua", session_key)
+    end)
+
+    if not ok then
+        encnet.open("left", session_key)
+    end
+end
+
+-- rm data helpers libs main identity.txt initiliaze_craftos.lua main.lua redo_encnet.lua testing.lua
